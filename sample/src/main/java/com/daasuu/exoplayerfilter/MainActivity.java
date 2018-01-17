@@ -1,17 +1,26 @@
 package com.daasuu.exoplayerfilter;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.daasuu.epf.EPlayerView;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
+import com.github.angads25.filepicker.model.DialogConfigs;
+import com.github.angads25.filepicker.model.DialogProperties;
+import com.github.angads25.filepicker.view.FilePickerDialog;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -28,6 +37,8 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -39,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
 
+    // for file chooser
+    DialogProperties properties = new DialogProperties();
+    FilePickerDialog dialog;
+
+    // for videoFileReformatter
+    String inputVideoFilePath;
+    String shaderFileNameStr = "flip_3d.frag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +64,90 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setUpViews();
 
+        // spinner to choose the frame size
+        Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
+        List<String> image2dor3dformaList = new ArrayList<String>();
+        image2dor3dformaList.add("3D format");
+        image2dor3dformaList.add("2D format");
+        final List<String> shaderFilePathStrList = new ArrayList<String>();
+        shaderFilePathStrList.add("flip_3d.frag");
+        shaderFilePathStrList.add("flip_2d.frag");
+
+        {
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_spinner_item, image2dor3dformaList);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            image2dor3dformat_spinner.setAdapter(dataAdapter);
+        }
+        image2dor3dformat_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // On selecting a spinner item
+                // String item = parent.getItemAtPosition(pos).toString();
+                shaderFileNameStr = shaderFilePathStrList.get(pos);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+        // file chooser
+        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+        properties.selection_type = DialogConfigs.FILE_SELECT;
+        properties.root = new File(DialogConfigs.DEFAULT_DIR);
+        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
+        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
+        properties.extensions = null;
+        dialog = new FilePickerDialog(this,properties);
+        dialog.setTitle("Select a Video File");
+        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+            @Override
+            public void onSelectedFilePaths(String[] files) {
+                //files is the array of the paths of files selected by the Application User.
+                if (files == null || files.length < 1) {
+                    return;
+                }
+
+                String selectedFilePath = files[0];
+                inputVideoFilePath = selectedFilePath;
+
+                // set the file chooser's current default dir
+                String selectedDirPath = (new File(selectedFilePath)).getParent().toString();
+                // properties.root = new File(selectedDirPath);
+                properties.offset = new File(selectedDirPath);
+
+                TextView textViewChosenFileName = (TextView) findViewById(R.id.choosenfilename_textview);
+                textViewChosenFileName.setText("Chosen File: " + inputVideoFilePath);
+
+                // Measures bandwidth during playback. Can be null if not required.
+                DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
+                // Produces DataSource instances through which media data is loaded.
+                Context context = getApplicationContext();
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "yourApplicationName"), defaultBandwidthMeter);
+                // Produces Extractor instances for parsing the media data.
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                // This is the MediaSource representing the media to be played.
+//        // Original Option:
+//        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(Constant.STREAM_URL_MP4_VOD_LONG), dataSourceFactory, extractorsFactory, null, null);
+                // My Option to use File Chooser: inputVideoFilePath
+                // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
+                MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
+
+                // Prepare the player with the source.
+                player.prepare(videoSource);
+                player.setPlayWhenReady(true);
+
+            }
+        });
+    }
+
+    public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
+        dialog.show();
     }
 
     @Override
@@ -130,20 +232,25 @@ public class MainActivity extends AppCompatActivity {
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        // Measures bandwidth during playback. Can be null if not required.
-        DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        // This is the MediaSource representing the media to be played.
-        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(Constant.STREAM_URL_MP4_VOD_LONG), dataSourceFactory, extractorsFactory, null, null);
+//        // Measures bandwidth during playback. Can be null if not required.
+//        DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
+//        // Produces DataSource instances through which media data is loaded.
+//        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
+//        // Produces Extractor instances for parsing the media data.
+//        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+//        // This is the MediaSource representing the media to be played.
+////        // Original Option:
+////        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(Constant.STREAM_URL_MP4_VOD_LONG), dataSourceFactory, extractorsFactory, null, null);
+//        // My Option to use File Chooser: inputVideoFilePath
+//        // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
+//        MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
+
 
         // SimpleExoPlayer
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-        // Prepare the player with the source.
-        player.prepare(videoSource);
-        player.setPlayWhenReady(true);
+//        // Prepare the player with the source.
+//        player.prepare(videoSource);
+//        player.setPlayWhenReady(true);
 
     }
 

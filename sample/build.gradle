@@ -24,6 +24,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:26.1.0'
 
+    // file chooser lib: https://github.com/Angads25/android-filepicker
+    compile 'com.github.angads25:filepicker:1.1.1'
 
     compile project(':epf')
 }
