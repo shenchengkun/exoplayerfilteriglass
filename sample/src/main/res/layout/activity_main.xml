@@ -66,6 +66,7 @@
                 android:id="@+id/rescalesize_width_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="number"
                 android:text="1920" />
 
             <TextView
@@ -78,6 +79,7 @@
                 android:id="@+id/rescalesize_height_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="number"
                 android:text="1080" />
 
             <Spinner
