@@ -57,8 +57,8 @@ public class GlFilter {
     protected static final int VERTICES_DATA_POS_OFFSET = 0 * FLOAT_SIZE_BYTES;
     protected static final int VERTICES_DATA_UV_OFFSET = VERTICES_DATA_POS_OFFSET + VERTICES_DATA_POS_SIZE * FLOAT_SIZE_BYTES;
 
-    private final String vertexShaderSource;
-    private final String fragmentShaderSource;
+    private String vertexShaderSource;
+    private String fragmentShaderSource;
 
     private int program;
 
@@ -71,6 +71,14 @@ public class GlFilter {
 
     public GlFilter() {
         this(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
+    }
+
+    public void setVertexShaderSource(String vertexShaderSource) {
+        this.vertexShaderSource = vertexShaderSource;
+    }
+
+    public void setFragmentShaderSource(String fragmentShaderSource) {
+        this.fragmentShaderSource = fragmentShaderSource;
     }
 
     public GlFilter(final Resources res, final int vertexShaderSourceResId, final int fragmentShaderSourceResId) {

@@ -85,8 +85,14 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int pos, long id) {
                 // On selecting a spinner item
-                // String item = parent.getItemAtPosition(pos).toString();
-                shaderFileNameStr = shaderFilePathStrList.get(pos);
+                FilterType filterType;
+                if (pos == 0) {
+                    // 3D
+                    filterType = FilterType.FLIP3D;
+                } else {
+                    filterType = FilterType.FLIP2D;
+                }
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
             }
 
             @Override
@@ -213,16 +219,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // list
-        ListView listView = (ListView) findViewById(R.id.list);
-        final List<FilterType> filterTypes = FilterType.createFilterList();
-        listView.setAdapter(new FilterAdapter(this, R.layout.row_text, filterTypes));
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ePlayerView.setGlFilter(FilterType.createGlFilter(filterTypes.get(position), getApplicationContext()));
-            }
-        });
+//        // list
+//        ListView listView = (ListView) findViewById(R.id.list);
+//        final List<FilterType> filterTypes = FilterType.createFilterList();
+//        listView.setAdapter(new FilterAdapter(this, R.layout.row_text, filterTypes));
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterTypes.get(position), getApplicationContext()));
+//            }
+//        });
     }
 
 

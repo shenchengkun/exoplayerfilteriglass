@@ -11,6 +11,7 @@ import com.daasuu.epf.filter.GlBulgeDistortionFilter;
 import com.daasuu.epf.filter.GlCGAColorspaceFilter;
 import com.daasuu.epf.filter.GlFilter;
 import com.daasuu.epf.filter.GlFilterGroup;
+import com.daasuu.epf.filter.GlFlipFilter;
 import com.daasuu.epf.filter.GlGaussianBlurFilter;
 import com.daasuu.epf.filter.GlGrayScaleFilter;
 import com.daasuu.epf.filter.GlHazeFilter;
@@ -35,6 +36,8 @@ import java.util.List;
 
 public enum FilterType {
     DEFAULT,
+    FLIP3D,
+    FLIP2D,
     BILATERAL_BLUR,
     BOX_BLUR,
     TONE_CURVE_SAMPLE,
@@ -58,6 +61,7 @@ public enum FilterType {
         List<FilterType> filters = new ArrayList<>();
 
         filters.add(DEFAULT);
+        filters.add(FLIP3D);
         filters.add(SEPIA);
 //        filters.add(MONOCHROME);
         filters.add(TONE_CURVE_SAMPLE);
@@ -83,6 +87,10 @@ public enum FilterType {
         switch (filterType) {
             case DEFAULT:
                 return new GlFilter();
+            case FLIP3D:
+                return new GlFlipFilter(context, true);
+            case FLIP2D:
+                return new GlFlipFilter(context, false);
             case SEPIA:
                 return new GlSepiaFilter();
             case GRAY_SCALE:
