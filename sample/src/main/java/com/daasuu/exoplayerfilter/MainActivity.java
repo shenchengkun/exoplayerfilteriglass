@@ -1,5 +1,7 @@
 package com.daasuu.exoplayerfilter;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private EPlayerView ePlayerView;
     private SimpleExoPlayer player;
@@ -63,6 +65,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpViews();
+
+        // Hide the status bar on Android 4.1 (API level 16) and higher:
+        View decorView = getWindow().getDecorView();
+        // Hide the status bar.
+        // int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN; // show status bar
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;  // status bar now shown when the app starts. But once it is pulled down, it will stay there
+        decorView.setSystemUiVisibility(uiOptions);
+//        // Remember that you should never show the action bar if the
+//        // status bar is hidden, so hide that too if necessary.
+//        ActionBar actionBar = getActionBar();
+//        actionBar.hide();
+
 
         // spinner to choose the frame size
         Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
