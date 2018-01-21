@@ -138,8 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 // Produces Extractor instances for parsing the media data.
                 ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
                 // This is the MediaSource representing the media to be played.
-//        // Original Option:
-//        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(Constant.STREAM_URL_MP4_VOD_LONG), dataSourceFactory, extractorsFactory, null, null);
                 // My Option to use File Chooser: inputVideoFilePath
                 // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
                 MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
@@ -219,16 +217,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        // list
-//        ListView listView = (ListView) findViewById(R.id.list);
-//        final List<FilterType> filterTypes = FilterType.createFilterList();
-//        listView.setAdapter(new FilterAdapter(this, R.layout.row_text, filterTypes));
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterTypes.get(position), getApplicationContext()));
-//            }
-//        });
     }
 
 
@@ -238,25 +226,8 @@ public class MainActivity extends AppCompatActivity {
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-//        // Measures bandwidth during playback. Can be null if not required.
-//        DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
-//        // Produces DataSource instances through which media data is loaded.
-//        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
-//        // Produces Extractor instances for parsing the media data.
-//        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-//        // This is the MediaSource representing the media to be played.
-////        // Original Option:
-////        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(Constant.STREAM_URL_MP4_VOD_LONG), dataSourceFactory, extractorsFactory, null, null);
-//        // My Option to use File Chooser: inputVideoFilePath
-//        // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
-//        MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
-
-
         // SimpleExoPlayer
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-//        // Prepare the player with the source.
-//        player.prepare(videoSource);
-//        player.setPlayWhenReady(true);
 
     }
 
