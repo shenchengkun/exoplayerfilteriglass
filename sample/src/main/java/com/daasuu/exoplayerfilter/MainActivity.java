@@ -3,15 +3,19 @@ package com.daasuu.exoplayerfilter;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -252,6 +256,15 @@ public class MainActivity extends Activity {
 
 
     private void setUoGlPlayerView() {
+        // In xml, MovieWrapperView wrap_content height, let the LinearLayout below not visible
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        int screenWidth = size.x;
+        int screenHeight = size.y;
+        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
+        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 36));
+
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
