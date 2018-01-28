@@ -30,34 +30,55 @@
 
         </LinearLayout>
 
+<!--// can work-->
+    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:minHeight="90dp"-->
+        <!--android:background="@android:color/holo_orange_dark"-->
+        <!--android:orientation="horizontal">-->
+        <!--&lt;!&ndash;<com.daasuu.exoplayerfilter.MovieWrapperView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/layout_movie_wrapper"&ndash;&gt;-->
+            <!--&lt;!&ndash;&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="100dp" />&ndash;&gt;-->
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="90dp"
-        android:background="@android:color/holo_orange_dark"
-        android:orientation="horizontal">
+        <!--&lt;!&ndash;<com.daasuu.exoplayerfilter.MovieWrapperView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/layout_movie_wrapper"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="100dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="100dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:minHeight="30dp"&ndash;&gt;-->
+             <!--&lt;!&ndash;/>&ndash;&gt;-->
         <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
             <!--android:id="@+id/layout_movie_wrapper"-->
-            <!---->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="100dp" />-->
-
-        <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
-            <!--android:id="@+id/layout_movie_wrapper"-->
-
             <!--android:layout_width="100dp"-->
+            <!--android:layout_height="100dp"-->
             <!--android:minHeight="30dp"-->
-            <!--android:layout_height="100dp" />-->
+            <!--/>-->
 
-        <FrameLayout
+
+        <!--&lt;!&ndash;<FrameLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="100dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="200dp">&ndash;&gt;-->
+        <!--&lt;!&ndash;</FrameLayout>&ndash;&gt;-->
+
+    <!--</LinearLayout>-->
+
+
+        <!--&lt;!&ndash;// can work&ndash;&gt;-->
+        <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
+            <!--android:id="@+id/layout_movie_wrapper"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="100dp"-->
+            <!--android:minHeight="30dp"-->
+            <!--/>-->
+
+        <!--// can work-->
+        <com.daasuu.exoplayerfilter.MovieWrapperView
+            android:id="@+id/layout_movie_wrapper"
             android:layout_width="100dp"
-            android:layout_height="200dp">
-
-
-        </FrameLayout>
-
-    </LinearLayout>
+            android:layout_height="100dp"
+            />
 
         <SeekBar
             android:id="@+id/seekBar"

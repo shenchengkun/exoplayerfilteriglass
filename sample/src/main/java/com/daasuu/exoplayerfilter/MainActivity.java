@@ -6,6 +6,8 @@ import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.Display;
@@ -115,7 +117,7 @@ public class MainActivity extends Activity {
                 } else {
                     filterType = FilterType.FLIP2D;
                 }
-//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
             }
 
             @Override
@@ -180,9 +182,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-//        setUpSimpleExoPlayer();
-//        setUoGlPlayerView();
-//        setUpTimer();
+        setUpSimpleExoPlayer();
+        setUoGlPlayerView();
+        setUpTimer();
     }
 
     @Override
@@ -262,14 +264,19 @@ public class MainActivity extends Activity {
         display.getRealSize(size);
         int screenWidth = size.x;
         int screenHeight = size.y;
-//        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
-//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 100));
-//
-//        ePlayerView = new EPlayerView(this);
-//        ePlayerView.setSimpleExoPlayer(player);
-//        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).addView(ePlayerView);
-//        ePlayerView.onResume();
+        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
+
+//        // cannot work
+//         movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 80));
+
+//        // can work
+//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 100, screenHeight - 300));
+
+        ePlayerView = new EPlayerView(this);
+        ePlayerView.setSimpleExoPlayer(player);
+        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).addView(ePlayerView);
+        ePlayerView.onResume();
     }
 
 
@@ -292,13 +299,58 @@ public class MainActivity extends Activity {
 
 
     private void releasePlayer() {
-//        ePlayerView.onPause();
-//        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
-//        ePlayerView = null;
-//        player.stop();
-//        player.release();
-//        player = null;
+        ePlayerView.onPause();
+        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
+        ePlayerView = null;
+        player.stop();
+        player.release();
+        player = null;
     }
 
+    // https://android.googlesource.com/platform/development/+/e7a6ab4/samples/devbytes/ui/ImmersiveMode/src/main/java/com/example/android/immersive/ImmersiveActivity.java
+    // https://stackoverflow.com/questions/24187728/sticky-immersive-mode-disabled-after-soft-keyboard-shown
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // When the window loses focus (e.g. the action overflow is shown),
+        // cancel any pending hide action. When the window gains focus,
+        // hide the system UI.
+        if (hasFocus) {
+            delayedHide(300);
+        } else {
+            mHideHandler.removeMessages(0);
+        }
+    }
+    private void hideSystemUI() {
+//        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_LOW_PROFILE
+//                | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+    private void showSystemUI() {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+    private final Handler mHideHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            hideSystemUI();
+        }
+    };
+    private void delayedHide(int delayMillis) {
+        mHideHandler.removeMessages(0);
+        mHideHandler.sendEmptyMessageDelayed(0, delayMillis);
+    }
 
 }
