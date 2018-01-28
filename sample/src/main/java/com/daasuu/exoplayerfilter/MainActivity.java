@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
                 } else {
                     filterType = FilterType.FLIP2D;
                 }
-                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
+//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
             }
 
             @Override
@@ -180,9 +180,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        setUpSimpleExoPlayer();
-        setUoGlPlayerView();
-        setUpTimer();
+//        setUpSimpleExoPlayer();
+//        setUoGlPlayerView();
+//        setUpTimer();
     }
 
     @Override
@@ -262,14 +262,14 @@ public class MainActivity extends Activity {
         display.getRealSize(size);
         int screenWidth = size.x;
         int screenHeight = size.y;
-        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
-        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 100));
-
-        ePlayerView = new EPlayerView(this);
-        ePlayerView.setSimpleExoPlayer(player);
-        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).addView(ePlayerView);
-        ePlayerView.onResume();
+//        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
+//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 100));
+//
+//        ePlayerView = new EPlayerView(this);
+//        ePlayerView.setSimpleExoPlayer(player);
+//        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).addView(ePlayerView);
+//        ePlayerView.onResume();
     }
 
 
@@ -292,12 +292,12 @@ public class MainActivity extends Activity {
 
 
     private void releasePlayer() {
-        ePlayerView.onPause();
-        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
-        ePlayerView = null;
-        player.stop();
-        player.release();
-        player = null;
+//        ePlayerView.onPause();
+//        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
+//        ePlayerView = null;
+//        player.stop();
+//        player.release();
+//        player = null;
     }
 
 
