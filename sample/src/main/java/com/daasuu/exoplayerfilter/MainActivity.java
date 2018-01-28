@@ -263,7 +263,7 @@ public class MainActivity extends Activity {
         int screenWidth = size.x;
         int screenHeight = size.y;
         MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
-        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 36));
+        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 100));
 
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);

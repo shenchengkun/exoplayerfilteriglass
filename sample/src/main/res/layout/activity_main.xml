@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusableInTouchMode="true"
+        android:background="@android:color/holo_blue_dark"
         android:orientation="vertical">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,11 +31,18 @@
         </LinearLayout>
 
 
+        <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
+            <!--android:id="@+id/layout_movie_wrapper"-->
+            <!---->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="100dp" />-->
+
         <com.daasuu.exoplayerfilter.MovieWrapperView
             android:id="@+id/layout_movie_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="100dp" />
 
+            android:layout_width="100dp"
+            android:minHeight="30dp"
+            android:layout_height="100dp" />
         <SeekBar
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
