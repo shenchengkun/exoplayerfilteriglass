@@ -264,6 +264,12 @@ public class MainActivity extends Activity {
         display.getRealSize(size);
         int screenWidth = size.x;
         int screenHeight = size.y;
+
+        float density = this.getResources()
+                .getDisplayMetrics()
+                .density;
+        int topBarHeight = Math.round(density * 36);
+
         MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
 
 //        // cannot work
@@ -271,6 +277,10 @@ public class MainActivity extends Activity {
 
 //        // can work
 //        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 100, screenHeight - 300));
+
+          movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - topBarHeight));
+
+
 
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);
