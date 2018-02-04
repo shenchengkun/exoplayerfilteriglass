@@ -278,7 +278,10 @@ public class MainActivity extends Activity {
 //        // can work
 //        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 100, screenHeight - 300));
 
-          movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - topBarHeight));
+//        // cannot work
+//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - topBarHeight - 1));
+
+        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 1, screenHeight - topBarHeight - 1));
 
 
 
