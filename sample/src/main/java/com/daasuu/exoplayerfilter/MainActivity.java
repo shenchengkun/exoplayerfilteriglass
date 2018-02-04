@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_2);
         setUpViews();
 
         // https://developer.android.com/training/system-ui/immersive.html
@@ -280,8 +280,8 @@ public class MainActivity extends Activity {
 
 //        // cannot work
 //        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - topBarHeight - 1));
-
-        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 1, screenHeight - topBarHeight - 1));
+//
+//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 1, screenHeight - topBarHeight - 1));
 
 
 
