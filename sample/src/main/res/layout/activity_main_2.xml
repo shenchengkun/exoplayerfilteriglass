@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--My thinking:  FrameLayout:  VideoPlayerFrameLayout + ScrollView-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <com.daasuu.exoplayerfilter.MovieWrapperView
         android:id="@+id/layout_movie_wrapper"
@@ -37,45 +37,40 @@
                 android:layout_margin="8dp"
                 android:text="@string/pause" />
 
-            <View
-                android:id="@+id/separator"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@android:color/background_dark" />
-
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                >
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/padding_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:padding="16dp"
                     android:text="Padding Adjust" />
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/upperpadding_textview"
+                        android:layout_width="85dp"
+                        android:layout_height="match_parent"
                         android:layout_alignParentLeft="true"
-                        android:layout_width="wrap_content"
-                        android:layout_weight="0.1"
-                        android:layout_height="16dp"
-                        android:text="upper:"/>
+                        android:text="upper:" />
+
                     <com.xw.repo.BubbleSeekBar
                         android:id="@+id/upperpadding_bsk"
-                        android:layout_toRightOf="@id/upperpadding_textview"
                         android:layout_width="wrap_content"
-                        android:layout_weight="0.4"
                         android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/upperpadding_textview"
+                        android:layout_weight="0.4"
                         app:bsb_bubble_color="@android:color/holo_blue_light"
                         app:bsb_bubble_text_color="@color/colorPrimaryDark"
-                        app:bsb_max="0.2"
-                        app:bsb_min="0.0"
+                        app:bsb_max="20"
+                        app:bsb_min="0"
                         app:bsb_progress="0"
                         app:bsb_second_track_color="@android:color/holo_blue_light"
                         app:bsb_section_count="4"
@@ -84,24 +79,26 @@
                         app:bsb_show_section_mark="true"
                         app:bsb_show_section_text="true"
                         app:bsb_show_thumb_text="true"
-                        app:bsb_track_color="@android:color/holo_blue_light"/>
+                        app:bsb_track_color="@android:color/holo_blue_light" />
+
                     <TextView
                         android:id="@+id/bottompadding_textview"
-                        android:layout_toRightOf="@id/upperpadding_bsk"
-                        android:layout_width="wrap_content"
-                        android:layout_weight="0.1"
+                        android:layout_width="115dp"
                         android:layout_height="match_parent"
-                        android:text="bottom:"/>
+                        android:layout_toRightOf="@id/upperpadding_bsk"
+                        android:paddingLeft="30dp"
+                        android:text="bottom:" />
+
                     <com.xw.repo.BubbleSeekBar
                         android:id="@+id/bootompadding_bsk"
-                        android:layout_toRightOf="@id/bottompadding_textview"
                         android:layout_width="wrap_content"
-                        android:layout_weight="0.4"
                         android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/bottompadding_textview"
+                        android:layout_weight="0.4"
                         app:bsb_bubble_color="@android:color/holo_blue_light"
                         app:bsb_bubble_text_color="@color/colorPrimaryDark"
-                        app:bsb_max="0.2"
-                        app:bsb_min="0.0"
+                        app:bsb_max="20"
+                        app:bsb_min="0"
                         app:bsb_progress="0"
                         app:bsb_second_track_color="@android:color/holo_blue_light"
                         app:bsb_section_count="4"
@@ -110,30 +107,71 @@
                         app:bsb_show_section_mark="true"
                         app:bsb_show_section_text="true"
                         app:bsb_show_thumb_text="true"
-                        app:bsb_track_color="@android:color/holo_blue_light"/>
-
+                        app:bsb_track_color="@android:color/holo_blue_light" />
 
                 </RelativeLayout>
 
-                <com.xw.repo.BubbleSeekBar
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:bsb_bubble_color="@android:color/holo_blue_light"
-                    app:bsb_bubble_text_color="@color/colorPrimaryDark"
-                    app:bsb_max="0.2"
-                    app:bsb_min="0.0"
-                    app:bsb_progress="0"
-                    app:bsb_second_track_color="@android:color/holo_blue_light"
-                    app:bsb_section_count="4"
-                    app:bsb_section_text_position="bottom_sides"
-                    app:bsb_show_progress_in_float="true"
-                    app:bsb_show_section_mark="true"
-                    app:bsb_show_section_text="true"
-                    app:bsb_show_thumb_text="true"
-                    app:bsb_track_color="@android:color/holo_blue_light"/>
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/leftpadding_textview"
+                        android:layout_width="85dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentLeft="true"
+                        android:text="left/right:" />
+
+                    <com.xw.repo.BubbleSeekBar
+                        android:id="@+id/leftrightpadding_bsk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/leftpadding_textview"
+                        android:layout_weight="0.4"
+                        app:bsb_bubble_color="@android:color/holo_blue_light"
+                        app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                        app:bsb_max="20"
+                        app:bsb_min="0"
+                        app:bsb_progress="0.00"
+                        app:bsb_second_track_color="@android:color/holo_blue_light"
+                        app:bsb_section_count="4"
+                        app:bsb_section_text_position="bottom_sides"
+                        app:bsb_show_progress_in_float="true"
+                        app:bsb_show_section_mark="true"
+                        app:bsb_show_section_text="true"
+                        app:bsb_show_thumb_text="true"
+                        app:bsb_track_color="@android:color/holo_blue_light" />
+
+                    <TextView
+                        android:id="@+id/middlepadding_textview"
+                        android:layout_width="115dp"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@id/leftrightpadding_bsk"
+                        android:paddingLeft="30dp"
+                        android:text="middle:" />
+
+                    <com.xw.repo.BubbleSeekBar
+                        android:id="@+id/middlepadding_bsk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/middlepadding_textview"
+                        android:layout_weight="0.4"
+                        app:bsb_bubble_color="@android:color/holo_blue_light"
+                        app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                        app:bsb_max="20"
+                        app:bsb_min="0"
+                        app:bsb_progress="0.00"
+                        app:bsb_second_track_color="@android:color/holo_blue_light"
+                        app:bsb_section_count="4"
+                        app:bsb_section_text_position="bottom_sides"
+                        app:bsb_show_progress_in_float="true"
+                        app:bsb_show_section_mark="true"
+                        app:bsb_show_section_text="true"
+                        app:bsb_show_thumb_text="true"
+                        app:bsb_track_color="@android:color/holo_blue_light" />
 
 
-
+                </RelativeLayout>
 
 
                 <Spinner
@@ -148,15 +186,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="chooseVideoFileToProcess"
-                    android:text="Choose Video File to Reformat"
-                    />
+                    android:text="Choose Video File to Reformat" />
 
                 <TextView
                     android:id="@+id/choosenfilename_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Chosen File: " />
-
 
 
                 <!--The 4 below are not needed now-->
@@ -189,8 +225,6 @@
                     android:inputType="number"
                     android:text="1080"
                     android:visibility="gone" />
-
-
 
 
             </LinearLayout>
