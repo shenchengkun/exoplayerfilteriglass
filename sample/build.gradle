@@ -27,5 +27,8 @@ dependencies {
     // file chooser lib: https://github.com/Angads25/android-filepicker
     compile 'com.github.angads25:filepicker:1.1.1'
 
+    // https://github.com/woxingxiao/BubbleSeekBar
+    compile 'com.xw.repo:bubbleseekbar:3.14-lite'
+
     compile project(':epf')
 }
