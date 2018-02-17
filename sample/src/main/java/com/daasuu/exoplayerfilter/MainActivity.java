@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.Display;
@@ -23,8 +24,10 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.daasuu.epf.EPlayerView;
+import com.daasuu.epf.filter.VideoViewFilterParams;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -44,10 +47,12 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.xw.repo.BubbleSeekBar;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends Activity {
@@ -65,6 +70,14 @@ public class MainActivity extends Activity {
     // for videoFileReformatter
     String inputVideoFilePath;
     String shaderFileNameStr = "flip_3d.frag";
+
+    // padding of the frame image relative to the video player view window
+    private float bsk_upperpadding_percentage = 0.0f;
+    private float bsk_bottompadding_percentage = 0.0f;
+    private float bsk_leftrightpadding_percentage = 0.0f;
+    private float bsk_middlepadding_percentage = 0.0f;
+    private VideoViewFilterParams videoViewFilterParams = new VideoViewFilterParams();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,14 +123,29 @@ public class MainActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int pos, long id) {
                 // On selecting a spinner item
-                FilterType filterType;
+
+//                // Old code:
+//                FilterType filterType;
+//                if (pos == 0) {
+//                    // 3D
+//                    filterType = FilterType.FLIP3D;
+//                    videoViewFilterParams.threeD_TF = true;
+//                } else {
+//                    filterType = FilterType.FLIP2D;
+//                    videoViewFilterParams.threeD_TF = false;
+//                }
+//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+
+                FilterType filterType = FilterType.IGLASS;
                 if (pos == 0) {
                     // 3D
-                    filterType = FilterType.FLIP3D;
+                    videoViewFilterParams.threeD_TF = true;
                 } else {
-                    filterType = FilterType.FLIP2D;
+                    videoViewFilterParams.threeD_TF = false;
                 }
-                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, getApplicationContext()));
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
             }
 
             @Override
@@ -173,7 +201,60 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        // set the padding bubble seek bars listener
+        final BubbleSeekBar bsk_upperpadding = findViewById(R.id.upperpadding_bsk);
+        final BubbleSeekBar bsk_bottompadding = findViewById(R.id.bottompadding_bsk);
+        final BubbleSeekBar bsk_leftrightpadding = findViewById(R.id.leftrightpadding_bsk);
+        final BubbleSeekBar bsk_middlepadding = findViewById(R.id.middlepadding_bsk);
+        bsk_upperpadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                bsk_upperpadding_percentage = progressFloat;
+                videoViewFilterParams.upperPadding_percentage = progressFloat/100.0f;
+                FilterType filterType = FilterType.IGLASS;
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+
+            }
+        });
+        bsk_bottompadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                bsk_bottompadding_percentage = progressFloat;
+                videoViewFilterParams.bottomPadding_percentage = progressFloat/100.0f;
+                FilterType filterType = FilterType.IGLASS;
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+            }
+        });
+        bsk_leftrightpadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                bsk_leftrightpadding_percentage = progressFloat;
+                videoViewFilterParams.halfImgLeftPadding_percentage = progressFloat/100.0f;
+                FilterType filterType = FilterType.IGLASS;
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+            }
+        });
+        bsk_middlepadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                bsk_middlepadding_percentage = progressFloat;
+                // Note: halfImgRightPadding = middlePadding/2.0
+                videoViewFilterParams.halfImgRightPadding_percentage = progressFloat/100.0f/2.0f;
+                FilterType filterType = FilterType.IGLASS;
+                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+            }
+        });
+
     }
+
+    // END: protected void onCreate(Bundle savedInstanceState)
+
+
 
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
         dialog.show();
@@ -271,19 +352,6 @@ public class MainActivity extends Activity {
         int topBarHeight = Math.round(density * 36);
 
         MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
-
-//        // cannot work
-//         movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - 80));
-
-//        // can work
-//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 100, screenHeight - 300));
-
-//        // cannot work
-//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth, screenHeight - topBarHeight - 1));
-//
-//        movieWrapperView.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - 1, screenHeight - topBarHeight - 1));
-
-
 
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);

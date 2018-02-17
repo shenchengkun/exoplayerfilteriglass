@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.daasuu.epf.filter.GLIGlassFilter;
 import com.daasuu.epf.filter.GlBilateralFilter;
 import com.daasuu.epf.filter.GlBoxBlurFilter;
 import com.daasuu.epf.filter.GlBulgeDistortionFilter;
@@ -23,6 +24,7 @@ import com.daasuu.epf.filter.GlSharpenFilter;
 import com.daasuu.epf.filter.GlSphereRefractionFilter;
 import com.daasuu.epf.filter.GlToneCurveFilter;
 import com.daasuu.epf.filter.GlVignetteFilter;
+import com.daasuu.epf.filter.VideoViewFilterParams;
 import com.daasuu.exoplayerfilter.filtersample.GlBitmapOverlaySample;
 
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.util.List;
 
 public enum FilterType {
     DEFAULT,
+    IGLASS,
     FLIP3D,
     FLIP2D,
     BILATERAL_BLUR,
@@ -61,6 +64,7 @@ public enum FilterType {
         List<FilterType> filters = new ArrayList<>();
 
         filters.add(DEFAULT);
+        filters.add(IGLASS);
         filters.add(FLIP3D);
         filters.add(SEPIA);
 //        filters.add(MONOCHROME);
@@ -83,10 +87,12 @@ public enum FilterType {
         return filters;
     }
 
-    public static GlFilter createGlFilter(FilterType filterType, Context context) {
+    public static GlFilter createGlFilter(FilterType filterType, VideoViewFilterParams videoViewFilterParams, Context context) {
         switch (filterType) {
             case DEFAULT:
                 return new GlFilter();
+            case IGLASS:
+                return new GLIGlassFilter(context, videoViewFilterParams);
             case FLIP3D:
                 return new GlFlipFilter(context, true);
             case FLIP2D:

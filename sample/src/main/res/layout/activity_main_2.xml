@@ -90,7 +90,7 @@
                         android:text="bottom:" />
 
                     <com.xw.repo.BubbleSeekBar
-                        android:id="@+id/bootompadding_bsk"
+                        android:id="@+id/bottompadding_bsk"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@id/bottompadding_textview"
