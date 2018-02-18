@@ -3,8 +3,8 @@ precision mediump float;
 
 uniform float upperPadding_percentage;
 uniform float bottomPadding_percentage;
-uniform float halfImgLeftPadding_percentage;
-uniform float halfImgRightPadding_percentage;
+uniform float leftHalfImgLeftPadding_percentage;
+uniform float leftHalfImgRightPadding_percentage;
 varying vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
 
@@ -13,17 +13,22 @@ void main() {
   float x = vTextureCoord.x;
   float y = vTextureCoord.y;
 
-    // begin: calculate x2_AsInLeftHalf
+  // begin: calculate x2_AsInLeftHalf, thisHalfImgLeftPadding_percentage, thisHalfImgRightPadding_percentage
+  float thisHalfImgLeftPadding_percentage = leftHalfImgLeftPadding_percentage;
+  float thisHalfImgRightPadding_percentage = leftHalfImgRightPadding_percentage;
  float x2_AsInLeftHalf = x;
  if (x > 0.5) {
  x2_AsInLeftHalf = x - 0.5;
+ thisHalfImgLeftPadding_percentage = leftHalfImgRightPadding_percentage;
+ thisHalfImgRightPadding_percentage = leftHalfImgLeftPadding_percentage;
  }
+  // end: calculate x2_AsInLeftHalf, thisHalfImgLeftPadding_percentage, thisHalfImgRightPadding_percentage
 
  // set black in the padding area.
   if (y < bottomPadding_percentage ||
   y > 1.0 - upperPadding_percentage ||
-  x2_AsInLeftHalf < halfImgLeftPadding_percentage ||
-  x2_AsInLeftHalf > 0.5 - halfImgRightPadding_percentage) {
+  x2_AsInLeftHalf < thisHalfImgLeftPadding_percentage ||
+  x2_AsInLeftHalf > 0.5 - thisHalfImgRightPadding_percentage) {
   gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   return;
   }
@@ -32,8 +37,8 @@ void main() {
   // begin: calculate oriX_AsInLeftHalf, oriY_AsInLeftHalf
   float oriX_AsInLeftHalf = 0.0;
   float oriY_AsInLeftHalf = 0.0;
-  oriX_AsInLeftHalf = (x2_AsInLeftHalf - halfImgLeftPadding_percentage) /
-  (0.5 - halfImgRightPadding_percentage - halfImgLeftPadding_percentage) * 0.5;
+  oriX_AsInLeftHalf = (x2_AsInLeftHalf - thisHalfImgLeftPadding_percentage) /
+  (0.5 - thisHalfImgRightPadding_percentage - thisHalfImgLeftPadding_percentage) * 0.5;
   oriY_AsInLeftHalf = (y - bottomPadding_percentage) /
   (1.0 - upperPadding_percentage - bottomPadding_percentage);
   // end: calculate oriX_AsInLeftHalf, oriY_AsInLeftHalf

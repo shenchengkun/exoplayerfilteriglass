@@ -232,7 +232,7 @@ public class MainActivity extends Activity {
             @Override
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_leftrightpadding_percentage = progressFloat;
-                videoViewFilterParams.halfImgLeftPadding_percentage = progressFloat/100.0f;
+                videoViewFilterParams.leftHalfImgLeftPadding_percentage = progressFloat/100.0f;
                 FilterType filterType = FilterType.IGLASS;
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 
@@ -243,7 +243,7 @@ public class MainActivity extends Activity {
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_middlepadding_percentage = progressFloat;
                 // Note: halfImgRightPadding = middlePadding/2.0
-                videoViewFilterParams.halfImgRightPadding_percentage = progressFloat/100.0f/2.0f;
+                videoViewFilterParams.leftHalfImgRightPadding_percentage = progressFloat/100.0f/2.0f;
                 FilterType filterType = FilterType.IGLASS;
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 

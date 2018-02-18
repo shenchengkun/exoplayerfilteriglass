@@ -7,8 +7,8 @@ package com.daasuu.epf.filter;
 public class VideoViewFilterParams {
     public float upperPadding_percentage = 0.0f;
     public float bottomPadding_percentage = 0.0f;
-    public float halfImgLeftPadding_percentage = 0.0f;
-    public float halfImgRightPadding_percentage = 0.0f;
+    public float leftHalfImgLeftPadding_percentage = 0.0f;
+    public float leftHalfImgRightPadding_percentage = 0.0f;
 
     public boolean threeD_TF = true;
 }

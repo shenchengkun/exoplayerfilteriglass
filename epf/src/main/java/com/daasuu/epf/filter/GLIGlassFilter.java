@@ -17,8 +17,8 @@ import java.io.InputStreamReader;
 public class GLIGlassFilter extends GlFilter {
     private float upperPadding_percentage;
     private float bottomPadding_percentage;
-    private float halfImgLeftPadding_percentage;
-    private float halfImgRightPadding_percentage;
+    private float leftHalfImgLeftPadding_percentage;
+    private float leftHalfImgRightPadding_percentage;
 
 
     public GLIGlassFilter(Context context, VideoViewFilterParams videoViewFilterParams) {
@@ -28,13 +28,13 @@ public class GLIGlassFilter extends GlFilter {
 
         upperPadding_percentage = videoViewFilterParams.upperPadding_percentage;
         bottomPadding_percentage = videoViewFilterParams.bottomPadding_percentage;
-        halfImgLeftPadding_percentage = videoViewFilterParams.halfImgLeftPadding_percentage;
-        halfImgRightPadding_percentage = videoViewFilterParams.halfImgRightPadding_percentage;
+        leftHalfImgLeftPadding_percentage = videoViewFilterParams.leftHalfImgLeftPadding_percentage;
+        leftHalfImgRightPadding_percentage = videoViewFilterParams.leftHalfImgRightPadding_percentage;
 
         Log.d("GLIGlassFilter", "upperPadding_percentage: " + upperPadding_percentage);
         Log.d("GLIGlassFilter", "bottomPadding_percentage: " + bottomPadding_percentage);
-        Log.d("GLIGlassFilter", "halfImgLeftPadding_percentage: " + halfImgLeftPadding_percentage);
-        Log.d("GLIGlassFilter", "halfImgRightPadding_percentage: " + halfImgRightPadding_percentage);
+        Log.d("GLIGlassFilter", "leftHalfImgLeftPadding_percentage: " + leftHalfImgLeftPadding_percentage);
+        Log.d("GLIGlassFilter", "leftHalfImgRightPadding_percentage: " + leftHalfImgRightPadding_percentage);
 
 
         if (videoViewFilterParams.threeD_TF) {
@@ -67,13 +67,13 @@ public class GLIGlassFilter extends GlFilter {
 
         int upperPadding_percentage_uniform = getHandle("upperPadding_percentage");
         int bottomPadding_percentage_uniform = getHandle("bottomPadding_percentage");
-        int halfImgLeftPadding_percentage_uniform = getHandle("halfImgLeftPadding_percentage");
-        int halfImgRightPadding_percentage_uniform = getHandle("halfImgRightPadding_percentage");
+        int leftHalfImgLeftPadding_percentage_uniform = getHandle("leftHalfImgLeftPadding_percentage");
+        int leftHalfImgRightPadding_percentage_uniform = getHandle("leftHalfImgRightPadding_percentage");
 
         GLES20.glUniform1f(upperPadding_percentage_uniform, upperPadding_percentage);
         GLES20.glUniform1f(bottomPadding_percentage_uniform, bottomPadding_percentage);
-        GLES20.glUniform1f(halfImgLeftPadding_percentage_uniform, halfImgLeftPadding_percentage);
-        GLES20.glUniform1f(halfImgRightPadding_percentage_uniform, halfImgRightPadding_percentage);
+        GLES20.glUniform1f(leftHalfImgLeftPadding_percentage_uniform, leftHalfImgLeftPadding_percentage);
+        GLES20.glUniform1f(leftHalfImgRightPadding_percentage_uniform, leftHalfImgRightPadding_percentage);
 
     }
 }
