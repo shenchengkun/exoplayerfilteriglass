@@ -10,8 +10,10 @@
         android:layout_height="match_parent" />
 
     <ScrollView
+        android:id="@+id/scrollview_controller"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
 
         <!--transparent gray area, with white items-->
@@ -20,27 +22,34 @@
             android:layout_height="wrap_content"
             android:background="#88000000"
             android:orientation="vertical">
-            
+
+            <Button
+                android:id="@+id/btn_controlvisibility"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="@string/controlvisibility" />
+
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="4dp" />
 
             <Button
-                android:id="@+id/btn"
+                android:id="@+id/btn_pause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_margin="4dp"
                 android:text="@string/pause" />
 
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="8dp">
 
                 <TextView
                     android:id="@+id/padding_textview"

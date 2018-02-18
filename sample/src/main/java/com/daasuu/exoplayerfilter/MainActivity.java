@@ -1,6 +1,5 @@
 package com.daasuu.exoplayerfilter;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
@@ -8,23 +7,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Pair;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import com.daasuu.epf.EPlayerView;
 import com.daasuu.epf.filter.VideoViewFilterParams;
@@ -52,7 +45,6 @@ import com.xw.repo.BubbleSeekBar;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 
 public class MainActivity extends Activity {
@@ -279,8 +271,19 @@ public class MainActivity extends Activity {
     }
 
     private void setUpViews() {
+        // control visibility
+        // temporary use this way. Should have a more elegant way to do it, triggered by let be idle for a while
+        Button btn_controlvisibility = (Button) findViewById(R.id.btn_controlvisibility);
+        btn_controlvisibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
+                scrollview_controller.setVisibility(View.GONE);
+            }
+        });
+
         // play pause
-        button = (Button) findViewById(R.id.btn);
+        button = (Button) findViewById(R.id.btn_pause);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -356,8 +359,20 @@ public class MainActivity extends Activity {
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).addView(ePlayerView);
+        movieWrapperView.addView(ePlayerView);
         ePlayerView.onResume();
+
+        // ScrollView is accessed from the inner class. need to be delcared final
+        // can move scrollview_controller inside the onClick
+        final ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
+        movieWrapperView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                scrollview_controller.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
 
