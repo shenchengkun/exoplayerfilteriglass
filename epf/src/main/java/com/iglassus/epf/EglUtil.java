@@ -2,6 +2,7 @@ package com.iglassus.epf;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLException;
 import android.opengl.GLUtils;
 import android.util.Log;
@@ -131,4 +132,58 @@ public class EglUtil {
         }
         return textures[0];
     }
+
+    public static int loadTexture(final float[] lutData, int textureWidth, int textureHeight, final int usedTexId) {
+
+
+        // https://stackoverflow.com/questions/10697161/why-floatbuffer-instead-of-float
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(lutData.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());    // use the device hardware's native byte order
+        FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();  // create a floating point buffer from the ByteBuffer
+        floatBuffer.put(lutData);    // add the coordinates to the FloatBuffer
+        floatBuffer.position(0);      // set the buffer to read the first coordinate
+
+
+        int textures[] = new int[1];
+        if (usedTexId == NO_TEXTURE) {
+            GLES20.glGenTextures(1, textures, 0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+            // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml
+            // define texture with float format
+            int internalFormat = GLES30.GL_RG32F;
+            int pixelDataFormat = GLES30.GL_RG;
+
+//            int internalFormat = GLES20.GL_RGB32F;
+//            int pixelDataFormat = GLES20.GL_RGB;
+
+            int pixelDataType = GLES30.GL_FLOAT;
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
+                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
+
+        } else {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, usedTexId);
+            int internalFormat = GLES30.GL_RG32F;
+            int pixelDataFormat = GLES30.GL_RG;
+
+//            int internalFormat = GLES20.GL_RGB;
+//            int pixelDataFormat = GLES20.GL_RGB;
+
+            int pixelDataType = GLES30.GL_FLOAT;
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
+                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
+            textures[0] = usedTexId;
+        }
+        return textures[0];
+    }
+
+
 }

@@ -5,6 +5,8 @@ import android.content.res.AssetManager;
 import android.opengl.GLES20;
 import android.util.Log;
 
+import com.iglassus.epf.EglUtil;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ public class GLIGlassFilter extends GlFilter {
     private float leftHalfImgLeftPadding_percentage;
     private float leftHalfImgRightPadding_percentage;
 
+    private int hTex = EglUtil.NO_TEXTURE;
 
     public GLIGlassFilter(Context context, VideoViewFilterParams videoViewFilterParams) {
         AssetManager assetManager = context.getAssets();
@@ -75,5 +78,70 @@ public class GLIGlassFilter extends GlFilter {
         GLES20.glUniform1f(leftHalfImgLeftPadding_percentage_uniform, leftHalfImgLeftPadding_percentage);
         GLES20.glUniform1f(leftHalfImgRightPadding_percentage_uniform, leftHalfImgRightPadding_percentage);
 
+
+//        // // Option 1
+        int lutTexture_uniform = getHandle("lutTexture");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTex);
+        GLES20.glUniform1i(lutTexture_uniform, 3);
+//        // // Option 2
+        // int lutTexture_uniform = getHandle("lutTexture");
+//        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+//        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTex);
+//        GLES20.glUniform1i(lutTexture_uniform, 1);
+    }
+
+    @Override
+    public void setup() {
+        super.setup();
+        loadTexture();
+    }
+
+    private void loadTexture() {
+        if (hTex == EglUtil.NO_TEXTURE) {
+            // lutDataForDistortion
+            int textureWidth = 100;
+            int textureHeight = 100;
+//            float[] lutDataForDistortion = new float[textureHeight * textureWidth * 3];
+            float[] lutDataForDistortion = new float[textureHeight * textureWidth * 2];
+
+            // for debug test:
+            // create a fake one:
+            // texture: column-major order
+            // (x,y) [0.0, 1.0] ==>
+            int index = 0;
+            for (int row = 0; row < textureHeight; row++) {
+                for (int col = 0; col < textureWidth; col++) {
+                    float x = col / (textureWidth - 1.0f);
+                    float y = row / (textureHeight - 1.0f);
+
+                    // newx, newy
+                    float x2 = x - 0.5f;
+                    float y2 = y - 0.5f;
+
+                    float r_sqr = x2 * x2 + y2 * y2;
+                    float K1 = 0.0f; // 0.04f;
+                    float xu = x + (x - 0.5f) * (K1 * r_sqr);
+                    float yu = y + (y - 0.5f) * (K1 * r_sqr);
+
+//                    lutDataForDistortion[index] = xu;
+//                    index++;
+//                    lutDataForDistortion[index] = yu;
+//                    index++;
+//                    lutDataForDistortion[index] = 0.0f;
+//                    index++;
+
+
+                    lutDataForDistortion[index] = xu;
+                    index++;
+                    lutDataForDistortion[index] = yu;
+                    index++;
+
+
+                }
+            }
+
+            hTex = EglUtil.loadTexture(lutDataForDistortion, textureWidth, textureHeight, hTex);
+        }
     }
 }
