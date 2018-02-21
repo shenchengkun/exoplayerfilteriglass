@@ -27,7 +27,9 @@ public class GLIGlassFilter extends GlFilter {
     public GLIGlassFilter(Context context, VideoViewFilterParams videoViewFilterParams) {
         AssetManager assetManager = context.getAssets();
         String fragStr = null;
-        String filePath = "";
+        String fragFilePath = "";
+        String vertStr = null;
+        String vertFilePath = "";
 
         upperPadding_percentage = videoViewFilterParams.upperPadding_percentage;
         bottomPadding_percentage = videoViewFilterParams.bottomPadding_percentage;
@@ -41,26 +43,49 @@ public class GLIGlassFilter extends GlFilter {
 
 
         if (videoViewFilterParams.threeD_TF) {
-            filePath = "opengl/flip_3d_padding.frag";
+//            // GLES20
+//            fragFilePath = "opengl/flip_3d_padding.frag";
+
+            // GLES30
+            fragFilePath = "opengl/flip_3d_padding_ver3.frag";
+            vertFilePath = "opengl/default_vertex_shader_ver3.vert";
+
+
         } else {
-            filePath = "opengl/2d_toflip3d_padding.frag";
+            fragFilePath = "opengl/2d_toflip3d_padding.frag";
         }
         try {
-            InputStream fileInputStream = assetManager.open(filePath);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
+            {
+                InputStream fileInputStream = assetManager.open(fragFilePath);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+                StringBuilder stringBuilder = new StringBuilder();
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                }
+                bufferedReader.close();
+                fileInputStream.close();
+                fragStr = stringBuilder.toString();
             }
-            bufferedReader.close();
-            fileInputStream.close();
-            fragStr = stringBuilder.toString();
+
+            {
+                InputStream fileInputStream = assetManager.open(vertFilePath);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+                StringBuilder stringBuilder = new StringBuilder();
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                }
+                bufferedReader.close();
+                fileInputStream.close();
+                vertStr = stringBuilder.toString();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        setVertexShaderSource(DEFAULT_VERTEX_SHADER);
+        setVertexShaderSource(vertStr);
         setFragmentShaderSource(fragStr);
     }
 
@@ -79,11 +104,11 @@ public class GLIGlassFilter extends GlFilter {
         GLES20.glUniform1f(leftHalfImgRightPadding_percentage_uniform, leftHalfImgRightPadding_percentage);
 
 
-//        // // Option 1
-        int lutTexture_uniform = getHandle("lutTexture");
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTex);
-        GLES20.glUniform1i(lutTexture_uniform, 3);
+////        // // Option 1
+//        int lutTexture_uniform = getHandle("lutTexture");
+//        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+//        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTex);
+//        GLES20.glUniform1i(lutTexture_uniform, 3);
 //        // // Option 2
         // int lutTexture_uniform = getHandle("lutTexture");
 //        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
@@ -94,7 +119,7 @@ public class GLIGlassFilter extends GlFilter {
     @Override
     public void setup() {
         super.setup();
-        loadTexture();
+//        loadTexture();
     }
 
     private void loadTexture() {
@@ -132,9 +157,21 @@ public class GLIGlassFilter extends GlFilter {
 //                    index++;
 
 
-                    lutDataForDistortion[index] = xu;
+//                    lutDataForDistortion[index] = xu;
+//                    index++;
+//                    lutDataForDistortion[index] = yu;
+//                    index++;
+
+
+//                    lutDataForDistortion[index] = 0.3f;
+//                    index++;
+//                    lutDataForDistortion[index] = 0.5f;
+//                    index++;
+
+
+                    lutDataForDistortion[index] = 0.3f * 255.f;
                     index++;
-                    lutDataForDistortion[index] = yu;
+                    lutDataForDistortion[index] = 0.5f * 255.f;
                     index++;
 
 

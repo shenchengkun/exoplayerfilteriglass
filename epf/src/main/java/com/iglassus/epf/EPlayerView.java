@@ -32,6 +32,10 @@ public class EPlayerView extends GLSurfaceView implements SimpleExoPlayer.VideoL
         setEGLContextFactory(new EContextFactory());
         setEGLConfigChooser(new EConfigChooser());
 
+        // https://developer.android.com/training/graphics/opengl/environment.html
+        // Create an OpenGL ES 2.0 context
+        setEGLContextClientVersion(2);
+
         renderer = new EPlayerRenderer(this);
         setRenderer(renderer);
 
