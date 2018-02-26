@@ -5,11 +5,9 @@ uniform float upperPadding_percentage;
 uniform float bottomPadding_percentage;
 uniform float leftHalfImgLeftPadding_percentage;
 uniform float leftHalfImgRightPadding_percentage;
-varying highp vec2 vTextureCoord;
+varying vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
-uniform highp sampler2D lutTexture;
 
-// for precision, refer to "Precision Qualifiers", p33 at: https://www.khronos.org/files/opengles_shading_language.pdf
 // Version: flip 3D (left image and right image)
 void main() {
   float x = vTextureCoord.x;
@@ -64,28 +62,5 @@ void main() {
   }
   // end: flip
 
-  // begin: distortion
-  vec2 distortedXY = texture2D(lutTexture, vec2(oriX, oriY)).rg;
-  // end: distortion
-
-//  gl_FragColor = texture2D(sTexture, vec2(oriX, oriY) + 0.00001*distortedXY).rgba;
-//  gl_FragColor = texture2D(sTexture, distortedXY).rgba;
-//gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
-
-//// Option:  black screen
-//float gVal = texture2D(sTexture, vec2(oriX, oriY)).g;
-//gl_FragColor = vec4(distortedXY.x/2.0, 0.00001 * gVal, 0.0, 1.0);
-
-
-//// Option:  black screen
-//float gVal = texture2D(sTexture, vec2(oriX, oriY)).g;
-//gl_FragColor = vec4(distortedXY.x + 0.5, 0.00001 * gVal, 0.0, 1.0);
-
-// Option:
-gl_FragColor = texture2D(sTexture, vec2(oriX, oriY) + distortedXY).rgba;
-
-//// Option without distortion
-//   gl_FragColor = texture2D(sTexture, vec2(oriX, oriY)).rgba;
-
-
+  gl_FragColor = texture2D(sTexture, vec2(oriX, oriY)).rgba;
 }
