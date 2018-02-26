@@ -3,6 +3,7 @@ package com.iglassus.exoplayerfilter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
+import android.media.MediaCodecInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
@@ -102,6 +104,7 @@ public class MainActivity extends Activity {
         List<String> image2dor3dformaList = new ArrayList<String>();
         image2dor3dformaList.add("3D format");
         image2dor3dformaList.add("2D format");
+        image2dor3dformaList.add("1D format");
         final List<String> shaderFilePathStrList = new ArrayList<String>();
         shaderFilePathStrList.add("flip_3d.frag");
         shaderFilePathStrList.add("flip_2d.frag");
@@ -118,28 +121,24 @@ public class MainActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int pos, long id) {
                 // On selecting a spinner item
-
-//                // Old code:
-//                FilterType filterType;
-//                if (pos == 0) {
-//                    // 3D
-//                    filterType = FilterType.FLIP3D;
-//                    videoViewFilterParams.threeD_TF = true;
-//                } else {
-//                    filterType = FilterType.FLIP2D;
-//                    videoViewFilterParams.threeD_TF = false;
-//                }
-//                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+                if (pos == 0) {
+                    image2dor3dformat_spinner_pos = 0;
+                } else if (pos == 1) {
+                    image2dor3dformat_spinner_pos = 1;
+                } else if (pos == 2) {
+                    image2dor3dformat_spinner_pos = 2;
+                }
 
 
                 FilterType filterType = FilterType.IGLASS;
-                if (pos == 0) {
+                if (image2dor3dformat_spinner_pos == 0) {
                     // 3D
-                    videoViewFilterParams.threeD_TF = true;
-                    image2dor3dformat_spinner_pos = 0;
-                } else {
-                    videoViewFilterParams.threeD_TF = false;
-                    image2dor3dformat_spinner_pos = 1;
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
+                } else if (image2dor3dformat_spinner_pos == 1){
+                    // 2D
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
+                } else if (image2dor3dformat_spinner_pos == 2) {
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
                 }
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 
@@ -200,10 +199,12 @@ public class MainActivity extends Activity {
                 FilterType filterType = FilterType.IGLASS;
                 if (image2dor3dformat_spinner_pos == 0) {
                     // 3D
-                    videoViewFilterParams.threeD_TF = true;
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
                 } else if (image2dor3dformat_spinner_pos == 1){
                     // 2D
-                    videoViewFilterParams.threeD_TF = false;
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
+                } else if (image2dor3dformat_spinner_pos == 2) {
+                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
                 }
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 

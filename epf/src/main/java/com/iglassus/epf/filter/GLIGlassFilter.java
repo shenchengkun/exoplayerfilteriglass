@@ -37,11 +37,21 @@ public class GLIGlassFilter extends GlFilter {
         Log.d("GLIGlassFilter", "leftHalfImgRightPadding_percentage: " + leftHalfImgRightPadding_percentage);
 
 
-        if (videoViewFilterParams.threeD_TF) {
+//        if (videoViewFilterParams.threeD_TF) {
+//            filePath = "opengl/flip_3d_padding.frag";
+//        } else {
+//            filePath = "opengl/2d_toflip3d_padding.frag";
+//        }
+
+        if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format3D) {
             filePath = "opengl/flip_3d_padding.frag";
-        } else {
+        } else if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format2D){
             filePath = "opengl/2d_toflip3d_padding.frag";
+        } else if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format1D) {
+            filePath = "opengl/1d_flip_padding.frag";
         }
+
+
         try {
             InputStream fileInputStream = assetManager.open(filePath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
