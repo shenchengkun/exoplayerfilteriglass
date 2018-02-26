@@ -94,7 +94,6 @@ public class GlFilter {
         release();
         vertexShader = EglUtil.loadShader(vertexShaderSource, GL_VERTEX_SHADER);
         fragmentShader = EglUtil.loadShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-        EglUtil.checkEglError("load shader");
         program = EglUtil.createProgram(vertexShader, fragmentShader);
         vertexBufferName = EglUtil.createBuffer(VERTICES_DATA);
     }

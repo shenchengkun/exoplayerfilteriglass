@@ -54,23 +54,13 @@ public class EglUtil {
         GLES20.glAttachShader(program, vertexShader);
         GLES20.glAttachShader(program, pixelShader);
 
-//        GLES20.glLinkProgram(program);
-//        final int[] linkStatus = new int[1];
-//        GLES20.glGetProgramiv(program, GL_LINK_STATUS, linkStatus, 0);
-//        if (linkStatus[0] != GL_TRUE) {
-//            GLES20.glDeleteProgram(program);
-//            throw new RuntimeException("Could not link program");
-//        }
-
-        GLES30.glLinkProgram(program);
+        GLES20.glLinkProgram(program);
         final int[] linkStatus = new int[1];
-        GLES30.glGetProgramiv(program, GL_LINK_STATUS, linkStatus, 0);
-//        if (linkStatus[0] != GL_TRUE) {
-//            GLES30.glDeleteProgram(program);
-//            throw new RuntimeException("Could not link program");
-//        }
-
-
+        GLES20.glGetProgramiv(program, GL_LINK_STATUS, linkStatus, 0);
+        if (linkStatus[0] != GL_TRUE) {
+            GLES20.glDeleteProgram(program);
+            throw new RuntimeException("Could not link program");
+        }
         return program;
     }
 
@@ -172,15 +162,12 @@ public class EglUtil {
             int internalFormat = GLES30.GL_RG32F;
             int pixelDataFormat = GLES30.GL_RG;
 
-            int pixelDataType = GLES30.GL_FLOAT;
-//            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
-//                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
-            GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
-                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
-
 //            int internalFormat = GLES20.GL_RGB32F;
 //            int pixelDataFormat = GLES20.GL_RGB;
 
+            int pixelDataType = GLES30.GL_FLOAT;
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
+                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
 
         } else {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, usedTexId);
@@ -191,12 +178,8 @@ public class EglUtil {
 //            int pixelDataFormat = GLES20.GL_RGB;
 
             int pixelDataType = GLES30.GL_FLOAT;
-//            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
-//                    textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
-            GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, internalFormat, textureWidth,
                     textureHeight, 0, pixelDataFormat, pixelDataType, floatBuffer);
-
-
             textures[0] = usedTexId;
         }
         return textures[0];

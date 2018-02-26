@@ -9,10 +9,6 @@ varying highp vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
 uniform highp sampler2D lutTexture;
 
-// http://www.shaderific.com/blog/2014/3/13/tutorial-how-to-update-a-shader-for-opengl-es-30
-// https://stackoverflow.com/questions/24903517/mixing-opengl-es-2-0-and-3-0
-// https://stackoverflow.com/questions/18672919/how-do-i-declare-the-opengl-version-in-shaders-on-android
-// https://www.khronos.org/registry/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
 // for precision, refer to "Precision Qualifiers", p33 at: https://www.khronos.org/files/opengles_shading_language.pdf
 // Version: flip 3D (left image and right image)
 void main() {
