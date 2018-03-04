@@ -7,6 +7,8 @@ uniform float leftHalfImgLeftPadding_percentage;
 uniform float leftHalfImgRightPadding_percentage;
 varying vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
+uniform mediump sampler2D intPartLUTTexture;
+uniform mediump sampler2D decimal255PartLUTTexture;
 
 // Version: flip 3D (left image and right image)
 void main() {
@@ -61,6 +63,10 @@ void main() {
   oriX = 1.5 - oriX;
   }
   // end: flip
+
+  // coordinate lookup table
+  vec2 tmp1 = texture2D(intPartLUTTexture, vec2(oriX, oriY)).rg;
+  vec2 tmp2 = texture2D(decimal255PartLUTTexture, vec2(oriX, oriY)).rg;
 
   gl_FragColor = texture2D(sTexture, vec2(oriX, oriY)).rgba;
 }
