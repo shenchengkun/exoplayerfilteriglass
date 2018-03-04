@@ -7,7 +7,7 @@ uniform float leftHalfImgLeftPadding_percentage;
 uniform float leftHalfImgRightPadding_percentage;
 varying vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
-
+uniform mediump sampler2D NO1_byte_fromRight_Texture;
 // Version: 1D. Ignore middle gap. flip
 // I modify the code based on the 3D version. So some variable names may not make sense in this case.
 // But this way may make the future modification of all shaders easier.
@@ -41,6 +41,17 @@ void main() {
   oriX = 1.0 - oriX;
   // end: flip
 
-  gl_FragColor = texture2D(sTexture, vec2(oriX, oriY)).rgba;
+//// Option without distortion
+//  gl_FragColor = texture2D(sTexture, vec2(oriX, oriY)).rgba;
+
+    // Option with distortion
+    // coordinate lookup table
+    vec2 byte1 = texture2D(NO1_byte_fromRight_Texture, vec2(oriX, oriY)).rg;
+
+    float distortedX = byte1.x;
+    float distortedY = byte1.y;
+
+    gl_FragColor = texture2D(sTexture, vec2(distortedX, distortedY)).rgba;
+
 }
 

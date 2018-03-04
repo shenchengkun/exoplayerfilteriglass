@@ -8,7 +8,7 @@ uniform float leftHalfImgRightPadding_percentage;
 varying vec2 vTextureCoord;
 uniform lowp sampler2D sTexture;
 uniform mediump sampler2D NO1_byte_fromRight_Texture;
-uniform mediump sampler2D NO2_byte_fromRight_Texture;
+//uniform mediump sampler2D NO2_byte_fromRight_Texture;
 
 // Version: flip 3D (left image and right image)
 void main() {
@@ -66,23 +66,9 @@ void main() {
 
   // coordinate lookup table
   vec2 byte1 = texture2D(NO1_byte_fromRight_Texture, vec2(oriX, oriY)).rg;
-  vec2 byte2 = texture2D(NO2_byte_fromRight_Texture, vec2(oriX, oriY)).rg;
 
-  // internal format GL_RGB, converts to float [0, 1].
-  // int cast: floor it
-  int temp1 = int(byte1.x * 255.0);
-  int temp2 = int(byte2.x * 255.0);
-  // ERROR: 0:74: '<<' :  supported in pack/unpack shaders only
-  // int temp2ShiftLeft = temp2<<8;
-  int temp2ShiftLeft = temp2 * 256;
-  int temp3 = temp1 + temp2ShiftLeft;
-  float distortedX = float(temp3) / 65535.0;
-
-  temp1 = int(byte1.y * 255.0);
-  temp2 = int(byte2.y * 255.0);
-  temp2ShiftLeft = temp2 * 256;
-  temp3 = temp1 + temp2ShiftLeft;
-  float distortedY = float(temp3) / 65535.0;
+  float distortedX = byte1.x;
+  float distortedY = byte1.y;
 
   gl_FragColor = texture2D(sTexture, vec2(distortedX, distortedY)).rgba;
 }
