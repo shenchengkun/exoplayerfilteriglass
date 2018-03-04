@@ -84,74 +84,57 @@ public class GLIGlassFilter extends GlFilter {
         // begin: test data: set array and buffer for lookup table
         // 0.0 -> 1.0
         // 0 -> 2^8 -1, or 2^16 - 1, or ..., depending how many bytes you want to use
-
-        // Previously test it on 10x10, it gives very bad output. 100x100 can tell the distortion well.
-        int rows = 256;
-        int cols = 256;
-
+        int rows = 10;
+        int cols = 10;
         byte[] lookupTableData_byte1_FromRight = new byte[rows*cols*3];
         byte[] lookupTableData_byte2_FromRight = new byte[rows*cols*3];
         int pixelIndex = 0;
         for (int row = 0; row < rows; row++) {
-            double y = row / (rows - 1.0);
+            double x = row / (rows - 1.0);
             for (int col = 0; col < cols; col++) {
-                double x = col / (cols - 1.0f);
+                double y = col / (cols - 1.0f);
 
                 double r = Math.sqrt( x*x + y*y );
 
                 double newx = x;
                 double tmp = Math.abs(x - 0.5);
-                double newy = tmp * tmp + y;
+                double newy = tmp * tmp * tmp + y;
                 newy = Math.min(newy, 1.0);
 
-//                // begin: Option 1: two segments, two bytes.
-//                // After I finished the code and tested it, I realized that it cannot work.
-//                // Because the sample is interrupted by the two separate segments.
-//                int newx_2bytes = (int) Math.round(newx * (65536 - 1.0));
-//                int newy_2bytes = (int) Math.round(newy * (65536 - 1.0));
-//
-//                // Checked the values below, using: http://www.exploringbinary.com/binary-converter/
-//                int newx_No1byte = (byte) newx_2bytes; // <=== this will be wrong. we should use directly sign to data
-//                int newx_No2byte = (byte) (newx_2bytes >>> 8);
-//                int newy_No1byte = (byte) newy_2bytes;
-//                int newy_No2byte = (byte) (newy_2bytes >>> 8);
-//
-//                lookupTableData_byte1_FromRight[pixelIndex*3 + 0] = (byte) newx_No1byte;
-//                lookupTableData_byte1_FromRight[pixelIndex*3 + 1] = (byte) newy_No1byte;
-//
-//                lookupTableData_byte2_FromRight[pixelIndex*3 + 0] = (byte) newx_No2byte;
-//                lookupTableData_byte2_FromRight[pixelIndex*3 + 1] = (byte) newy_No2byte;
-//                // end: Option 1: two segments, two bytes
+                // Option 1:
+                int newx_2bytes = (int) Math.round(newx * (65536 - 1.0));
+                int newy_2bytes = (int) Math.round(newy * (65536 - 1.0));
+
+                // Checked the values below, using: http://www.exploringbinary.com/binary-converter/
+                int newx_No1byte = (byte) newx_2bytes;
+                int newx_No2byte = (byte) (newx_2bytes >>> 8);
+                int newy_No1byte = (byte) newy_2bytes;
+                int newy_No2byte = (byte) (newy_2bytes >>> 8);
+
+                lookupTableData_byte1_FromRight[pixelIndex*3 + 0] = (byte) newx_No1byte;
+                lookupTableData_byte1_FromRight[pixelIndex*3 + 1] = (byte) newy_No1byte;
+
+                lookupTableData_byte2_FromRight[pixelIndex*3 + 0] = (byte) newx_No2byte;
+                lookupTableData_byte2_FromRight[pixelIndex*3 + 1] = (byte) newy_No2byte;
 
 
-                // begin: Option 2: 1 byte
-                int newx_2bytes = (int) Math.round(newx * (256 - 1.0));
-                int newy_2bytes = (int) Math.round(newy * (256 - 1.0));
+                // Option 2:
 
-                lookupTableData_byte1_FromRight[pixelIndex*3 + 0] = (byte) newx_2bytes;
-                lookupTableData_byte1_FromRight[pixelIndex*3 + 1] = (byte) newy_2bytes;
-//                lookupTableData_byte1_FromRight[pixelIndex*3 + 2] = (byte) 0;
-                // end: Option 2: 1 byte
-
-                pixelIndex++;
+                pixelIndex ++;
 
             }
         }
-        // for debug:
-        Log.d("GLIGlassFilter", "pixelIndex: " + pixelIndex);
-
         ByteBuffer byte1_FromRight_buffer = ByteBuffer.allocate(rows*cols*3);
         byte1_FromRight_buffer.put(lookupTableData_byte1_FromRight);
         byte1_FromRight_buffer.position(0);
 
-//        ByteBuffer byte2_FromRight_buffer = ByteBuffer.allocate(rows*cols*3);
-//        byte2_FromRight_buffer.put(lookupTableData_byte2_FromRight);
-//        byte2_FromRight_buffer.position(0);
+        ByteBuffer byte2_FromRight_buffer = ByteBuffer.allocate(rows*cols*3);
+        byte2_FromRight_buffer.put(lookupTableData_byte2_FromRight);
+        byte2_FromRight_buffer.position(0);
 
         buffer1 = byte1_FromRight_buffer;
-//        buffer2 = byte2_FromRight_buffer;
+        buffer2 = byte2_FromRight_buffer;
         buffer1_width = cols;
-
         buffer1_height = rows;
         buffer2_width = cols;
         buffer2_height = rows;
@@ -179,10 +162,10 @@ public class GLIGlassFilter extends GlFilter {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textureHandle1);
         GLES20.glUniform1i(NO1_byte_fromRight_Texture_uniform, 2);
 
-//        int NO2_byte_fromRight_Texture_uniform = getHandle("NO2_byte_fromRight_Texture");
-//        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
-//        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textureHandle2);
-//        GLES20.glUniform1i(NO2_byte_fromRight_Texture_uniform, 3);
+        int NO2_byte_fromRight_Texture_uniform = getHandle("NO2_byte_fromRight_Texture");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textureHandle2);
+        GLES20.glUniform1i(NO2_byte_fromRight_Texture_uniform, 3);
 
     }
 
@@ -196,9 +179,9 @@ public class GLIGlassFilter extends GlFilter {
         if (textureHandle1 == EglUtil.NO_TEXTURE) {
             textureHandle1 = EglUtil.loadTextureFromByteBufferRGB(buffer1, buffer1_width, buffer1_height, EglUtil.NO_TEXTURE);
         }
-//        if (textureHandle2 == EglUtil.NO_TEXTURE) {
-//            textureHandle2 = EglUtil.loadTextureFromByteBufferRGB(buffer2, buffer2_width, buffer2_height, EglUtil.NO_TEXTURE);
-//        }
+        if (textureHandle2 == EglUtil.NO_TEXTURE) {
+            textureHandle2 = EglUtil.loadTextureFromByteBufferRGB(buffer2, buffer2_width, buffer2_height, EglUtil.NO_TEXTURE);
+        }
 
     }
 
