@@ -82,10 +82,12 @@ public class GLIGlassFilter extends GlFilter {
         setFragmentShaderSource(fragStr);
 
         // begin: test data: set array and buffer for lookup table
+        // 0.0 -> 1.0
+        // 0 -> 2^8 -1, or 2^16 - 1, or ..., depending how many bytes you want to use
         int rows = 10;
         int cols = 10;
-        byte[] lookupTableIntPartData = new byte[rows*cols*3];
-        byte[] lookupTableDecimal255PartData = new byte[rows*cols*3];
+        byte[] lookupTableData_byte1_FromRight = new byte[rows*cols*3];
+        byte[] lookupTableData_byte2_FromRight = new byte[rows*cols*3];
         int pixelIndex = 0;
         for (int row = 0; row < rows; row++) {
             double x = row / (rows - 1.0);
@@ -97,38 +99,41 @@ public class GLIGlassFilter extends GlFilter {
                 double newx = x;
                 double tmp = Math.abs(x - 0.5);
                 double newy = tmp * tmp * tmp + y;
+                newy = Math.min(newy, 1.0);
 
-                // put the (newx, newy) in the texture
-                // textureIntPart, textureDecimalPart
-                int newxInt = (int) (newx);
-                int newyInt = (int) (newy);
+                // Option 1:
+                int newx_2bytes = (int) Math.round(newx * (65536 - 1.0));
+                int newy_2bytes = (int) Math.round(newy * (65536 - 1.0));
 
-                double newx_decimal = newx - newxInt;
-                // The value should be one within [0, 255]
-                int newx_decimal255 = (int) (newx_decimal / 255.0);
-                double newy_decimal = newy - newyInt;
-                int newy_decimal255 = (int) (newy_decimal / 255.0);
+                // Checked the values below, using: http://www.exploringbinary.com/binary-converter/
+                int newx_No1byte = (byte) newx_2bytes;
+                int newx_No2byte = (byte) (newx_2bytes >>> 8);
+                int newy_No1byte = (byte) newy_2bytes;
+                int newy_No2byte = (byte) (newy_2bytes >>> 8);
 
-                lookupTableIntPartData[pixelIndex*3 + 0] = (byte) newxInt;
-                lookupTableIntPartData[pixelIndex*3 + 1] = (byte) newyInt;
+                lookupTableData_byte1_FromRight[pixelIndex*3 + 0] = (byte) newx_No1byte;
+                lookupTableData_byte1_FromRight[pixelIndex*3 + 1] = (byte) newy_No1byte;
 
-                lookupTableDecimal255PartData[pixelIndex*3 + 0] = (byte) newx_decimal255;
-                lookupTableDecimal255PartData[pixelIndex*3 + 1] = (byte) newy_decimal255;
+                lookupTableData_byte2_FromRight[pixelIndex*3 + 0] = (byte) newx_No2byte;
+                lookupTableData_byte2_FromRight[pixelIndex*3 + 1] = (byte) newy_No2byte;
+
+
+                // Option 2:
 
                 pixelIndex ++;
 
             }
         }
-        ByteBuffer lookupTableIntPartData_buffer = ByteBuffer.allocate(rows*cols*3);
-        lookupTableIntPartData_buffer.put(lookupTableIntPartData);
-        lookupTableIntPartData_buffer.position(0);
+        ByteBuffer byte1_FromRight_buffer = ByteBuffer.allocate(rows*cols*3);
+        byte1_FromRight_buffer.put(lookupTableData_byte1_FromRight);
+        byte1_FromRight_buffer.position(0);
 
-        ByteBuffer lookupTableDecimal255PartData_buffer = ByteBuffer.allocate(rows*cols*3);
-        lookupTableDecimal255PartData_buffer.put(lookupTableDecimal255PartData);
-        lookupTableDecimal255PartData_buffer.position(0);
+        ByteBuffer byte2_FromRight_buffer = ByteBuffer.allocate(rows*cols*3);
+        byte2_FromRight_buffer.put(lookupTableData_byte2_FromRight);
+        byte2_FromRight_buffer.position(0);
 
-        buffer1 = lookupTableIntPartData_buffer;
-        buffer2 = lookupTableDecimal255PartData_buffer;
+        buffer1 = byte1_FromRight_buffer;
+        buffer2 = byte2_FromRight_buffer;
         buffer1_width = cols;
         buffer1_height = rows;
         buffer2_width = cols;
@@ -151,17 +156,16 @@ public class GLIGlassFilter extends GlFilter {
         GLES20.glUniform1f(leftHalfImgLeftPadding_percentage_uniform, leftHalfImgLeftPadding_percentage);
         GLES20.glUniform1f(leftHalfImgRightPadding_percentage_uniform, leftHalfImgRightPadding_percentage);
 
-        int dintPartLUTTexture_uniform = getHandle("intPartLUTTexture");
+        // Note: GL_TEXTURE2, should match the number "2"
+        int NO1_byte_fromRight_Texture_uniform = getHandle("NO1_byte_fromRight_Texture");
         GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textureHandle1);
-        GLES20.glUniform1i(dintPartLUTTexture_uniform, 2);
+        GLES20.glUniform1i(NO1_byte_fromRight_Texture_uniform, 2);
 
-        int decimal255PartLUTTexture_uniform = getHandle("decimal255PartLUTTexture");
+        int NO2_byte_fromRight_Texture_uniform = getHandle("NO2_byte_fromRight_Texture");
         GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textureHandle2);
-        GLES20.glUniform1i(decimal255PartLUTTexture_uniform, 3);
-
-
+        GLES20.glUniform1i(NO2_byte_fromRight_Texture_uniform, 3);
 
     }
 
