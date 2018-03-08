@@ -30,50 +30,6 @@
 
         </LinearLayout>
 
-<!--// can work-->
-    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:minHeight="90dp"-->
-        <!--android:background="@android:color/holo_orange_dark"-->
-        <!--android:orientation="horizontal">-->
-        <!--&lt;!&ndash;<com.daasuu.exoplayerfilter.MovieWrapperView&ndash;&gt;-->
-            <!--&lt;!&ndash;android:id="@+id/layout_movie_wrapper"&ndash;&gt;-->
-            <!--&lt;!&ndash;&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="100dp" />&ndash;&gt;-->
-
-        <!--&lt;!&ndash;<com.daasuu.exoplayerfilter.MovieWrapperView&ndash;&gt;-->
-            <!--&lt;!&ndash;android:id="@+id/layout_movie_wrapper"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="100dp"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="100dp"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:minHeight="30dp"&ndash;&gt;-->
-             <!--&lt;!&ndash;/>&ndash;&gt;-->
-        <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
-            <!--android:id="@+id/layout_movie_wrapper"-->
-            <!--android:layout_width="100dp"-->
-            <!--android:layout_height="100dp"-->
-            <!--android:minHeight="30dp"-->
-            <!--/>-->
-
-
-        <!--&lt;!&ndash;<FrameLayout&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="100dp"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="200dp">&ndash;&gt;-->
-        <!--&lt;!&ndash;</FrameLayout>&ndash;&gt;-->
-
-    <!--</LinearLayout>-->
-
-
-        <!--&lt;!&ndash;// can work&ndash;&gt;-->
-        <!--<com.daasuu.exoplayerfilter.MovieWrapperView-->
-            <!--android:id="@+id/layout_movie_wrapper"-->
-            <!--android:layout_width="100dp"-->
-            <!--android:layout_height="100dp"-->
-            <!--android:minHeight="30dp"-->
-            <!--/>-->
-
-        <!--// can work-->
         <com.iglassus.exoplayerfilter.MovieWrapperView
             android:id="@+id/layout_movie_wrapper"
             android:layout_width="100dp"
@@ -139,13 +95,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
-            <Button
-                android:id="@+id/choose_videofile_toprocess_button"
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="chooseVideoFileToProcess"
-                android:text="Choose Video File to Reformat" />
 
             <TextView
                 android:id="@+id/choosenfilename_textview"

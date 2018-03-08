@@ -19,6 +19,13 @@ public class GLIGlassFilter extends GlFilter {
     private float bottomPadding_percentage;
     private float leftHalfImgLeftPadding_percentage;
     private float leftHalfImgRightPadding_percentage;
+    private float centerX;
+    private float centerY;
+    private float radius;
+    private float scale;
+    private float flip;
+    private float distortion;
+    private float dup;
 
 
     public GLIGlassFilter(Context context, VideoViewFilterParams videoViewFilterParams) {
@@ -26,6 +33,13 @@ public class GLIGlassFilter extends GlFilter {
         String fragStr = null;
         String filePath = "";
 
+        centerX = 0.5f;
+        centerY = 0.5f;
+        radius = 0.5f;
+        scale = 0.5f;
+
+        distortion=videoViewFilterParams.distortion?1f:0f;
+        flip=videoViewFilterParams.flip?1f:0f;
         upperPadding_percentage = videoViewFilterParams.upperPadding_percentage;
         bottomPadding_percentage = videoViewFilterParams.bottomPadding_percentage;
         leftHalfImgLeftPadding_percentage = videoViewFilterParams.leftHalfImgLeftPadding_percentage;
@@ -36,22 +50,18 @@ public class GLIGlassFilter extends GlFilter {
         Log.d("GLIGlassFilter", "leftHalfImgLeftPadding_percentage: " + leftHalfImgLeftPadding_percentage);
         Log.d("GLIGlassFilter", "leftHalfImgRightPadding_percentage: " + leftHalfImgRightPadding_percentage);
 
-
-//        if (videoViewFilterParams.threeD_TF) {
-//            filePath = "opengl/flip_3d_padding.frag";
-//        } else {
-//            filePath = "opengl/2d_toflip3d_padding.frag";
-//        }
-
         if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format3D) {
             filePath = "opengl/flip_3d_padding.frag";
+            dup=0f;
         } else if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format2D){
             filePath = "opengl/2d_toflip3d_padding.frag";
+            dup=1f;
         } else if (videoViewFilterParams.frameImgFormat == VideoViewFilterParams.FrameImgFormatEnum.Format1D) {
             filePath = "opengl/1d_flip_padding.frag";
+            dup=0f;
         }
 
-
+        filePath="opengl/myFrag.frag";
         try {
             InputStream fileInputStream = assetManager.open(filePath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
@@ -66,7 +76,6 @@ public class GLIGlassFilter extends GlFilter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         setVertexShaderSource(DEFAULT_VERTEX_SHADER);
         setFragmentShaderSource(fragStr);
     }
@@ -75,15 +84,18 @@ public class GLIGlassFilter extends GlFilter {
     protected void onDraw() {
         super.onDraw();
 
-        int upperPadding_percentage_uniform = getHandle("upperPadding_percentage");
-        int bottomPadding_percentage_uniform = getHandle("bottomPadding_percentage");
-        int leftHalfImgLeftPadding_percentage_uniform = getHandle("leftHalfImgLeftPadding_percentage");
-        int leftHalfImgRightPadding_percentage_uniform = getHandle("leftHalfImgRightPadding_percentage");
+        GLES20.glUniform1f(getHandle("upperPadding_percentage"), upperPadding_percentage);
+        GLES20.glUniform1f(getHandle("bottomPadding_percentage"), bottomPadding_percentage);
+        GLES20.glUniform1f(getHandle("leftHalfImgLeftPadding_percentage"), leftHalfImgLeftPadding_percentage);
+        GLES20.glUniform1f(getHandle("leftHalfImgRightPadding_percentage"), leftHalfImgRightPadding_percentage);
+        GLES20.glUniform1f(getHandle("flip"), flip);
+        GLES20.glUniform1f(getHandle("distortion"), distortion);
+        GLES20.glUniform1f(getHandle("dup"), dup);
 
-        GLES20.glUniform1f(upperPadding_percentage_uniform, upperPadding_percentage);
-        GLES20.glUniform1f(bottomPadding_percentage_uniform, bottomPadding_percentage);
-        GLES20.glUniform1f(leftHalfImgLeftPadding_percentage_uniform, leftHalfImgLeftPadding_percentage);
-        GLES20.glUniform1f(leftHalfImgRightPadding_percentage_uniform, leftHalfImgRightPadding_percentage);
+
+        GLES20.glUniform2f(getHandle("center"), centerX, centerY);
+        GLES20.glUniform1f(getHandle("radius"), radius);
+        GLES20.glUniform1f(getHandle("scale"), scale);
 
     }
 }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.media.MediaCodecInfo;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +51,6 @@ import java.util.List;
 
 
 public class MainActivity extends Activity {
-
     private EPlayerView ePlayerView;
     private SimpleExoPlayer player;
     private Button button;
@@ -60,9 +60,7 @@ public class MainActivity extends Activity {
     // for file chooser
     DialogProperties properties = new DialogProperties();
     FilePickerDialog filePickerDialog;
-
-    // for frame image format: 3D, 2D,
-    int image2dor3dformat_spinner_pos = 0;
+    VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format1D;
 
     // for videoFileReformatter
     String inputVideoFilePath;
@@ -73,7 +71,10 @@ public class MainActivity extends Activity {
     private float bsk_bottompadding_percentage = 0.0f;
     private float bsk_leftrightpadding_percentage = 0.0f;
     private float bsk_middlepadding_percentage = 0.0f;
-    private VideoViewFilterParams videoViewFilterParams = new VideoViewFilterParams();
+    private boolean flip=false;
+    private boolean distortion=false;
+    private VideoViewFilterParams videoViewFilterParams;
+    final static FilterType filterType = FilterType.IGLASS;
 
 
     @Override
@@ -81,6 +82,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_2);
         setUpViews();
+        videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage);
+
 
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
@@ -99,16 +102,16 @@ public class MainActivity extends Activity {
 //        actionBar.hide();
 
 
-        // spinner to choose the frame size
-        Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
-        List<String> image2dor3dformaList = new ArrayList<String>();
-        image2dor3dformaList.add("3D format");
-        image2dor3dformaList.add("2D format");
-        image2dor3dformaList.add("1D format");
         final List<String> shaderFilePathStrList = new ArrayList<String>();
         shaderFilePathStrList.add("flip_3d.frag");
         shaderFilePathStrList.add("flip_2d.frag");
 
+        // spinner to choose the frame size
+        Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
+        List<String> image2dor3dformaList = new ArrayList<String>();
+        image2dor3dformaList.add("1D format");
+        image2dor3dformaList.add("2D format");
+        image2dor3dformaList.add("3D format");
         {
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                     android.R.layout.simple_spinner_item, image2dor3dformaList);
@@ -116,37 +119,23 @@ public class MainActivity extends Activity {
             image2dor3dformat_spinner.setAdapter(dataAdapter);
         }
         image2dor3dformat_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int pos, long id) {
                 // On selecting a spinner item
                 if (pos == 0) {
-                    image2dor3dformat_spinner_pos = 0;
+                    frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
                 } else if (pos == 1) {
-                    image2dor3dformat_spinner_pos = 1;
+                    frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
                 } else if (pos == 2) {
-                    image2dor3dformat_spinner_pos = 2;
+                    frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
                 }
-
-
-                FilterType filterType = FilterType.IGLASS;
-                if (image2dor3dformat_spinner_pos == 0) {
-                    // 3D
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
-                } else if (image2dor3dformat_spinner_pos == 1){
-                    // 2D
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
-                } else if (image2dor3dformat_spinner_pos == 2) {
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
-                }
+                videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
@@ -190,22 +179,9 @@ public class MainActivity extends Activity {
                 // My Option to use File Chooser: inputVideoFilePath
                 // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
                 MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
-
                 // Prepare the player with the source.
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
-
-                // ePlayerView.setGlFilter
-                FilterType filterType = FilterType.IGLASS;
-                if (image2dor3dformat_spinner_pos == 0) {
-                    // 3D
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
-                } else if (image2dor3dformat_spinner_pos == 1){
-                    // 2D
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
-                } else if (image2dor3dformat_spinner_pos == 2) {
-                    videoViewFilterParams.frameImgFormat = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
-                }
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
 
             }
@@ -220,31 +196,24 @@ public class MainActivity extends Activity {
             @Override
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_upperpadding_percentage = progressFloat;
-                videoViewFilterParams.upperPadding_percentage = progressFloat/100.0f;
-                FilterType filterType = FilterType.IGLASS;
+                videoViewFilterParams.setUpperPadding_percentage(progressFloat/100.0f);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-
-
             }
         });
         bsk_bottompadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
             @Override
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_bottompadding_percentage = progressFloat;
-                videoViewFilterParams.bottomPadding_percentage = progressFloat/100.0f;
-                FilterType filterType = FilterType.IGLASS;
+                videoViewFilterParams.setBottomPadding_percentage(progressFloat/100.0f);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-
             }
         });
         bsk_leftrightpadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
             @Override
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_leftrightpadding_percentage = progressFloat;
-                videoViewFilterParams.leftHalfImgLeftPadding_percentage = progressFloat/100.0f;
-                FilterType filterType = FilterType.IGLASS;
+                videoViewFilterParams.setLeftHalfImgLeftPadding_percentage(progressFloat/100.0f);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-
             }
         });
         bsk_middlepadding.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListenerAdapter() {
@@ -255,15 +224,12 @@ public class MainActivity extends Activity {
                 videoViewFilterParams.leftHalfImgRightPadding_percentage = progressFloat/100.0f/2.0f;
                 FilterType filterType = FilterType.IGLASS;
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-
             }
         });
 
     }
 
     // END: protected void onCreate(Bundle savedInstanceState)
-
-
 
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
         filePickerDialog.show();
@@ -357,7 +323,6 @@ public class MainActivity extends Activity {
 
     }
 
-
     private void setUoGlPlayerView() {
         // In xml, MovieWrapperView wrap_content height, let the LinearLayout below not visible
         Display display = getWindowManager().getDefaultDisplay();
@@ -392,7 +357,6 @@ public class MainActivity extends Activity {
         });
     }
 
-
     private void setUpTimer() {
         playerTimer = new PlayerTimer();
         playerTimer.setCallback(new PlayerTimer.Callback() {
@@ -409,7 +373,6 @@ public class MainActivity extends Activity {
         });
         playerTimer.start();
     }
-
 
     private void releasePlayer() {
         ePlayerView.onPause();
@@ -434,6 +397,7 @@ public class MainActivity extends Activity {
             mHideHandler.removeMessages(0);
         }
     }
+
     private void hideSystemUI() {
 //        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 //                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -466,4 +430,15 @@ public class MainActivity extends Activity {
         mHideHandler.sendEmptyMessageDelayed(0, delayMillis);
     }
 
+    public void distortFrame(View view) {
+        distortion=distortion?false:true;
+        videoViewFilterParams.setDistortion(distortion);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
+
+    public void flipFrame(View view) {
+        flip=flip?false:true;
+        videoViewFilterParams.setFlip(flip);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
 }

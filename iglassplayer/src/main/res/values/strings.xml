@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">0iGlassPlayer</string>
+    <string name="app_name">iGlassPlayer</string>
     <string name="play">play</string>
     <string name="pause">pause</string>
     <string name="controlvisibility">Control Gone</string>
