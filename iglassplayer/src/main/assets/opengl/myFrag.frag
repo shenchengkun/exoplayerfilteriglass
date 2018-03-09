@@ -45,6 +45,7 @@ void main() {
   oriY = (y - bottomPadding_percentage) /
   (1.0 - upperPadding_percentage - bottomPadding_percentage);
 
+//duplicate
   if(dup>0.5){
       if (oriX < 0.5) {
         oriX = 1.0 - 2.0 * oriX;

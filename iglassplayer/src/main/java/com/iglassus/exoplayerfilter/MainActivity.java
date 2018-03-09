@@ -2,9 +2,8 @@ package com.iglassus.exoplayerfilter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
-import android.media.MediaCodecInfo;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,7 +19,6 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
@@ -56,6 +54,7 @@ public class MainActivity extends Activity {
     private Button button;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
+    private boolean showPanel=true;
 
     // for file chooser
     DialogProperties properties = new DialogProperties();
@@ -64,7 +63,6 @@ public class MainActivity extends Activity {
 
     // for videoFileReformatter
     String inputVideoFilePath;
-    String shaderFileNameStr = "flip_3d.frag";
 
     // padding of the frame image relative to the video player view window
     private float bsk_upperpadding_percentage = 0.0f;
@@ -73,6 +71,7 @@ public class MainActivity extends Activity {
     private float bsk_middlepadding_percentage = 0.0f;
     private boolean flip=false;
     private boolean distortion=false;
+    private boolean isPlaying;
     private VideoViewFilterParams videoViewFilterParams;
     final static FilterType filterType = FilterType.IGLASS;
 
@@ -83,6 +82,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main_2);
         setUpViews();
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage);
+        isPlaying=false;
 
 
         // https://developer.android.com/training/system-ui/immersive.html
@@ -96,10 +96,7 @@ public class MainActivity extends Activity {
                  | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
-//        // Remember that you should never show the action bar if the
-//        // status bar is hidden, so hide that too if necessary.
-//        ActionBar actionBar = getActionBar();
-//        actionBar.hide();
+
 
 
         final List<String> shaderFilePathStrList = new ArrayList<String>();
@@ -183,6 +180,9 @@ public class MainActivity extends Activity {
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+                isPlaying=true;
+                button.setText(R.string.pause);
+
 
             }
         });
@@ -226,7 +226,9 @@ public class MainActivity extends Activity {
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
         });
-
+        setUpSimpleExoPlayer();
+        setUoGlPlayerView();
+        setUpTimer();
     }
 
     // END: protected void onCreate(Bundle savedInstanceState)
@@ -238,14 +240,20 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        setUpSimpleExoPlayer();
-        setUoGlPlayerView();
-        setUpTimer();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if (player == null) return;
+        player.setPlayWhenReady(false);
+        button.setText(R.string.play);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         releasePlayer();
         if (playerTimer != null) {
             playerTimer.stop();
@@ -270,7 +278,7 @@ public class MainActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (player == null) return;
+                if (!isPlaying) return;
 
                 if (button.getText().toString().equals(MainActivity.this.getString(R.string.pause))) {
                     player.setPlayWhenReady(false);
@@ -307,10 +315,10 @@ public class MainActivity extends Activity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // do nothing
             }
+
         });
 
     }
-
 
     private void setUpSimpleExoPlayer() {
 
@@ -383,6 +391,12 @@ public class MainActivity extends Activity {
         player = null;
     }
 
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+    }
+
     // https://android.googlesource.com/platform/development/+/e7a6ab4/samples/devbytes/ui/ImmersiveMode/src/main/java/com/example/android/immersive/ImmersiveActivity.java
     // https://stackoverflow.com/questions/24187728/sticky-immersive-mode-disabled-after-soft-keyboard-shown
     @Override
@@ -440,5 +454,10 @@ public class MainActivity extends Activity {
         flip=flip?false:true;
         videoViewFilterParams.setFlip(flip);
         ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
+
+    public void openYoutube(View view) {
+        Intent intent=new Intent(this,YoutubeActivity.class);
+        startActivity(intent);
     }
 }

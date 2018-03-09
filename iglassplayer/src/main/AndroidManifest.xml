@@ -19,10 +19,11 @@
             android:theme="@style/PlayerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".YoutubeActivity" android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 
 </manifest>
