@@ -56,7 +56,6 @@ public class GlLookUpTableFilter extends GlFilter {
     }
 
     private int hTex;
-
     private Bitmap lutTexture;
 
     @Override

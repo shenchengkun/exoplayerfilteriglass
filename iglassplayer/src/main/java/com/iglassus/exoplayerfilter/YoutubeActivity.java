@@ -27,4 +27,9 @@ public class YoutubeActivity extends Activity{
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }

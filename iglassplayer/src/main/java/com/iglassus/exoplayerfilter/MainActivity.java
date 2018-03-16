@@ -3,11 +3,14 @@ package com.iglassus.exoplayerfilter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,19 +74,17 @@ public class MainActivity extends Activity {
     private float bsk_middlepadding_percentage = 0.0f;
     private boolean flip=false;
     private boolean distortion=false;
-    private boolean isPlaying;
     private VideoViewFilterParams videoViewFilterParams;
     final static FilterType filterType = FilterType.IGLASS;
-
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_2);
         setUpViews();
-        videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage);
-        isPlaying=false;
-
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
+        videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
 
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
@@ -96,12 +97,6 @@ public class MainActivity extends Activity {
                  | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
-
-
-
-        final List<String> shaderFilePathStrList = new ArrayList<String>();
-        shaderFilePathStrList.add("flip_3d.frag");
-        shaderFilePathStrList.add("flip_2d.frag");
 
         // spinner to choose the frame size
         Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
@@ -135,7 +130,6 @@ public class MainActivity extends Activity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-
 
         // file chooser
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
@@ -180,7 +174,6 @@ public class MainActivity extends Activity {
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-                isPlaying=true;
                 button.setText(R.string.pause);
 
 
@@ -229,26 +222,13 @@ public class MainActivity extends Activity {
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpTimer();
+        Log.i("开始","开始啦啦啦啦啦绿绿绿绿绿");
     }
 
     // END: protected void onCreate(Bundle savedInstanceState)
 
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
         filePickerDialog.show();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (player == null) return;
-        player.setPlayWhenReady(false);
-        button.setText(R.string.play);
-
     }
 
     @Override
@@ -259,6 +239,7 @@ public class MainActivity extends Activity {
             playerTimer.stop();
             playerTimer.removeMessages(0);
         }
+        Log.i("破坏","被破坏啦啦啦啦啦绿绿绿绿绿");
     }
 
     private void setUpViews() {
@@ -278,7 +259,7 @@ public class MainActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isPlaying) return;
+                //if (!isPlaying) return;
 
                 if (button.getText().toString().equals(MainActivity.this.getString(R.string.pause))) {
                     player.setPlayWhenReady(false);
@@ -391,12 +372,6 @@ public class MainActivity extends Activity {
         player = null;
     }
 
-    @Override
-    protected void onStop() {
-
-        super.onStop();
-    }
-
     // https://android.googlesource.com/platform/development/+/e7a6ab4/samples/devbytes/ui/ImmersiveMode/src/main/java/com/example/android/immersive/ImmersiveActivity.java
     // https://stackoverflow.com/questions/24187728/sticky-immersive-mode-disabled-after-soft-keyboard-shown
     @Override
@@ -457,6 +432,8 @@ public class MainActivity extends Activity {
     }
 
     public void openYoutube(View view) {
+        player.setPlayWhenReady(false);
+        button.setText(R.string.play);
         Intent intent=new Intent(this,YoutubeActivity.class);
         startActivity(intent);
     }

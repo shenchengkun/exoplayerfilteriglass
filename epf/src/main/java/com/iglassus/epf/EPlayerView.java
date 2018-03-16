@@ -3,6 +3,7 @@ package com.iglassus.epf;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.view.SurfaceHolder;
 
 import com.iglassus.epf.chooser.EConfigChooser;
 import com.iglassus.epf.contextfactory.EContextFactory;
@@ -52,7 +53,6 @@ public class EPlayerView extends GLSurfaceView implements SimpleExoPlayer.VideoL
         renderer.setGlFilter(glFilter);
     }
 
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -93,4 +93,6 @@ public class EPlayerView extends GLSurfaceView implements SimpleExoPlayer.VideoL
     public void onRenderedFirstFrame() {
         // do nothing
     }
+
+
 }

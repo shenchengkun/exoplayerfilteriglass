@@ -1,10 +1,14 @@
 package com.iglassus.epf.filter;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by AsusUser on 2/4/2018.
  */
 
 public class VideoViewFilterParams {
+    public final Bitmap bitmap;
+
     public enum FrameImgFormatEnum {
         Format3D,
         Format2D,
@@ -18,7 +22,7 @@ public class VideoViewFilterParams {
     public float leftHalfImgLeftPadding_percentage;
     public float leftHalfImgRightPadding_percentage;
 
-    public VideoViewFilterParams(boolean flip, boolean distortion,FrameImgFormatEnum frameImgFormat, float upperPadding_percentage, float bottomPadding_percentage, float leftHalfImgLeftPadding_percentage, float leftHalfImgRightPadding_percentage) {
+    public VideoViewFilterParams(boolean flip, boolean distortion, FrameImgFormatEnum frameImgFormat, float upperPadding_percentage, float bottomPadding_percentage, float leftHalfImgLeftPadding_percentage, float leftHalfImgRightPadding_percentage, Bitmap bitmap) {
         this.flip = flip;
         this.distortion = distortion;
         this.upperPadding_percentage = upperPadding_percentage;
@@ -26,6 +30,7 @@ public class VideoViewFilterParams {
         this.leftHalfImgLeftPadding_percentage = leftHalfImgLeftPadding_percentage;
         this.leftHalfImgRightPadding_percentage = leftHalfImgRightPadding_percentage;
         this.frameImgFormat=frameImgFormat;
+        this.bitmap=bitmap;
     }
 
     public boolean isFlip() {
