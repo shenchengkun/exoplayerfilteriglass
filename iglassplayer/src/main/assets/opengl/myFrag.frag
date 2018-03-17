@@ -14,7 +14,7 @@ uniform lowp sampler2D sTexture;
 
 vec2 toPolar(vec2 point) {
     float r = length(point);
-    float theta = atan(point.y, point.x);
+    float theta = atan(point.y,point.x);           //这其实就是atan2，返回的是-pi到pi
     return vec2(r, theta);
 }
 
@@ -43,17 +43,11 @@ void main() {
 
   //distortion
   if(distortion>0.5){
-    vec2 polarBase=toPolar(vec2(-0.25,0.75));
-    vec2 polarCur=toPolar(vec2(x-0.5,y+0.75));
+    vec2 polarBase=toPolar(vec2(-0.375,0.85*3.0));                           //矩形扇形坐标变换
+    vec2 polarCur=toPolar(vec2(x-0.5,y+0.85*3.0));
     float baseR=polarBase.x,baseTheta=polarBase.y,curR=polarCur.x,curTheta=polarCur.y;
 
-
-    highp vec2 centre=vec2(0.3,0.4);
-    highp float alpha = 0.2;
-    highp vec2 p1 = vec2(2.0 * vec2(x,y) - 1.0) - centre;
-    highp vec2 p2 = p1 / (1.0 - alpha * length(p1));
-    p2 = (p2 + centre + 1.0) * 0.5;
-    //vec2 p3=vec2((baseTheta-curTheta)/(2*curTheta-3.1415926),curR/baseR-1);
+    highp vec2 p2=vec2((baseTheta-curTheta)/(2.0*baseTheta-3.1415926),3.0*(curR/baseR-1.0));
     if (all(greaterThanEqual(p2, vec2(0.0)))&&all(lessThanEqual(p2, vec2(1.0)))){
         x = p2.x;
         y = p2.y;

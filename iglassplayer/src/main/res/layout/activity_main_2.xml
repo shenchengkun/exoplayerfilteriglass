@@ -2,8 +2,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:onClick="panelShowHide">
+    android:layout_height="match_parent">
+
+
+    <Button
+        android:id="@+id/openControl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unlock"
+        android:layout_margin="4dp"
+        android:onClick="openControlPanel"/>
 
     <com.iglassus.exoplayerfilter.MovieWrapperView
         android:id="@+id/layout_movie_wrapper"
@@ -15,22 +23,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-
-
         <!--transparent gray area, with white items-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#88000000"
             android:orientation="vertical">
-
             <Button
                 android:id="@+id/btn_controlvisibility"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:text="@string/controlvisibility" />
-
+                android:text="@string/controlvisibility"
+                android:layout_margin="4dp"/>
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
@@ -129,7 +133,7 @@
                         android:layout_width="85dp"
                         android:layout_height="match_parent"
                         android:layout_alignParentLeft="true"
-                        android:text="left/right:" />
+                        android:text="left:" />
 
                     <com.xw.repo.BubbleSeekBar
                         android:id="@+id/leftrightpadding_bsk"
@@ -157,7 +161,7 @@
                         android:layout_height="match_parent"
                         android:layout_toRightOf="@id/leftrightpadding_bsk"
                         android:paddingLeft="30dp"
-                        android:text="middle:" />
+                        android:text="right:" />
 
                     <com.xw.repo.BubbleSeekBar
                         android:id="@+id/middlepadding_bsk"
@@ -178,8 +182,6 @@
                         app:bsb_show_section_text="true"
                         app:bsb_show_thumb_text="true"
                         app:bsb_track_color="@android:color/holo_blue_light" />
-
-
                 </RelativeLayout>
 
 

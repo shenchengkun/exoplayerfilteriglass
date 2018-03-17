@@ -23,6 +23,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.Player;
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
@@ -51,10 +52,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity{
     private EPlayerView ePlayerView;
     private SimpleExoPlayer player;
-    private Button button;
+    private Button playPause,openControl;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
     private boolean showPanel=true;
@@ -89,6 +90,8 @@ public class MainActivity extends Activity {
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
         // https://bradmartin.net/2016/03/10/fullscreen-and-navigation-bar-color-in-a-nativescript-android-app/
+        openControl=findViewById(R.id.openControl);
+        openControl.setVisibility(View.GONE);
         View decorView = getWindow().getDecorView();
         int uiOptions =  View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -174,7 +177,7 @@ public class MainActivity extends Activity {
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-                button.setText(R.string.pause);
+                playPause.setText(R.string.pause);
 
 
             }
@@ -214,7 +217,7 @@ public class MainActivity extends Activity {
             public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
                 bsk_middlepadding_percentage = progressFloat;
                 // Note: halfImgRightPadding = middlePadding/2.0
-                videoViewFilterParams.leftHalfImgRightPadding_percentage = progressFloat/100.0f/2.0f;
+                videoViewFilterParams.leftHalfImgRightPadding_percentage = progressFloat/100.0f;
                 FilterType filterType = FilterType.IGLASS;
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
@@ -245,7 +248,7 @@ public class MainActivity extends Activity {
     private void setUpViews() {
         // control visibility
         // temporary use this way. Should have a more elegant way to do it, triggered by let be idle for a while
-        Button btn_controlvisibility = (Button) findViewById(R.id.btn_controlvisibility);
+        final Button btn_controlvisibility = (Button) findViewById(R.id.btn_controlvisibility);
         btn_controlvisibility.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -255,18 +258,18 @@ public class MainActivity extends Activity {
         });
 
         // play pause
-        button = (Button) findViewById(R.id.btn_pause);
-        button.setOnClickListener(new View.OnClickListener() {
+        playPause = (Button) findViewById(R.id.btn_pause);
+        playPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //if (!isPlaying) return;
 
-                if (button.getText().toString().equals(MainActivity.this.getString(R.string.pause))) {
+                if (playPause.getText().toString().equals(MainActivity.this.getString(R.string.pause))) {
                     player.setPlayWhenReady(false);
-                    button.setText(R.string.play);
+                    playPause.setText(R.string.play);
                 } else {
                     player.setPlayWhenReady(true);
-                    button.setText(R.string.pause);
+                    playPause.setText(R.string.pause);
                 }
             }
         });
@@ -309,7 +312,7 @@ public class MainActivity extends Activity {
 
         // SimpleExoPlayer
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-
+        player.setRepeatMode(Player.REPEAT_MODE_ONE);
     }
 
     private void setUoGlPlayerView() {
@@ -341,7 +344,13 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v)
             {
-                scrollview_controller.setVisibility(View.VISIBLE);
+                //scrollview_controller.setVisibility(View.VISIBLE);
+                if(openControl.getVisibility()==View.VISIBLE){
+                    openControl.setVisibility(View.GONE);
+                    return;
+                }
+                openControl.setVisibility(View.VISIBLE);
+                openControl.bringToFront();
             }
         });
     }
@@ -433,8 +442,14 @@ public class MainActivity extends Activity {
 
     public void openYoutube(View view) {
         player.setPlayWhenReady(false);
-        button.setText(R.string.play);
+        playPause.setText(R.string.play);
         Intent intent=new Intent(this,YoutubeActivity.class);
         startActivity(intent);
+    }
+
+    public void openControlPanel(View view) {
+        final ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
+        scrollview_controller.setVisibility(View.VISIBLE);
+        openControl.setVisibility(View.GONE);
     }
 }
