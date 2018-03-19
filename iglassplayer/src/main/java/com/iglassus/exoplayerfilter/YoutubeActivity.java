@@ -16,7 +16,7 @@ public class YoutubeActivity extends Activity{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_3);
+        setContentView(R.layout.activity_youtube);
         mWebview=findViewById(R.id.webView);
         mWebview.getSettings().setJavaScriptEnabled(true); // enable javascript
         mWebview.setWebViewClient(new WebViewClient());

@@ -1,11 +1,13 @@
 package com.iglassus.exoplayerfilter;
 
 import android.app.Activity;
+import android.app.Presentation;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -82,7 +85,18 @@ public class MainActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_2);
+        setContentView(R.layout.activity_main);
+
+        DisplayManager  mDisplayManager;//屏幕管理类
+        Display[]  displays;//屏幕数组
+        mDisplayManager = (DisplayManager)this.getSystemService(Context.DISPLAY_SERVICE);
+        displays =mDisplayManager.getDisplays();
+        if(displays.length>1) {
+            DifferentDislay mPresentation = new DifferentDislay(this, displays[1]);//displays[1]是副屏
+            mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            mPresentation.show();
+        }
+
         setUpViews();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
@@ -452,4 +466,20 @@ public class MainActivity extends Activity{
         scrollview_controller.setVisibility(View.VISIBLE);
         openControl.setVisibility(View.GONE);
     }
+
+    class DifferentDislay extends Presentation{
+
+        public DifferentDislay(Context outerContext, Display display) {
+            super(outerContext, display);
+        }
+        @Override
+
+        protected void onCreate(Bundle savedInstanceState) {
+
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.iglass_screen);
+
+        }
+    }
+
 }
