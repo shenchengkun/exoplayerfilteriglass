@@ -1,5 +1,6 @@
 package com.iglassus.exoplayerfilter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Presentation;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.google.android.exoplayer2.Player;
 import com.iglassus.epf.EPlayerView;
@@ -61,7 +63,8 @@ public class MainActivity extends Activity{
     private Button playPause,openControl;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
-    private boolean showPanel=true;
+    private DifferentDisplay presentation;
+    private Display[] presentationDisplays;
 
     // for file chooser
     DialogProperties properties = new DialogProperties();
@@ -87,14 +90,16 @@ public class MainActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DisplayManager  mDisplayManager;//屏幕管理类
-        Display[]  displays;//屏幕数组
-        mDisplayManager = (DisplayManager)this.getSystemService(Context.DISPLAY_SERVICE);
-        displays =mDisplayManager.getDisplays();
-        if(displays.length>1) {
-            DifferentDislay mPresentation = new DifferentDislay(this, displays[1]);//displays[1]是副屏
-            mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-            mPresentation.show();
+   //    Intent intent=new Intent(this,IGlassService.class);
+   //    startService(intent);
+
+
+        DisplayManager displayManager = (DisplayManager)   this.getSystemService(Context.DISPLAY_SERVICE);
+        //获取屏幕数量
+        presentationDisplays = displayManager.getDisplays();
+        if (presentationDisplays.length >1) {
+            presentation = new DifferentDisplay(this, presentationDisplays[1]);
+            presentation.show();
         }
 
         setUpViews();
@@ -376,7 +381,6 @@ public class MainActivity extends Activity{
             public void onTick(long timeMillis) {
                 long position = player.getCurrentPosition();
                 long duration = player.getDuration();
-
                 if (duration <= 0) return;
 
                 seekBar.setMax((int) duration / 1000);
@@ -411,14 +415,6 @@ public class MainActivity extends Activity{
     }
 
     private void hideSystemUI() {
-//        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                | View.SYSTEM_UI_FLAG_IMMERSIVE);
-
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -426,6 +422,7 @@ public class MainActivity extends Activity{
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
+
     private void showSystemUI() {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -466,20 +463,4 @@ public class MainActivity extends Activity{
         scrollview_controller.setVisibility(View.VISIBLE);
         openControl.setVisibility(View.GONE);
     }
-
-    class DifferentDislay extends Presentation{
-
-        public DifferentDislay(Context outerContext, Display display) {
-            super(outerContext, display);
-        }
-        @Override
-
-        protected void onCreate(Bundle savedInstanceState) {
-
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.iglass_screen);
-
-        }
-    }
-
 }

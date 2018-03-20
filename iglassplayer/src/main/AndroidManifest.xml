@@ -31,6 +31,7 @@
         </activity>
 
         <activity android:name=".YoutubeActivity" android:configChanges="keyboardHidden|orientation|screenSize" />
+        <service android:enabled="true"  android:name=".IGlassService"/>
     </application>
 
 </manifest>
