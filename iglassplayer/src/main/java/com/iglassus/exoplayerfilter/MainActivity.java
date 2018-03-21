@@ -10,9 +10,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -58,7 +61,11 @@ import java.util.List;
 
 
 public class MainActivity extends Activity{
-    private EPlayerView ePlayerView;
+    public final static int REQUEST_CODE = -1010101;
+    Intent secondScreen;
+
+    public static EPlayerView ePlayerView;
+    public static MovieWrapperView movieWrapperView;
     private SimpleExoPlayer player;
     private Button playPause,openControl;
     private SeekBar seekBar;
@@ -85,15 +92,12 @@ public class MainActivity extends Activity{
     final static FilterType filterType = FilterType.IGLASS;
     private Bitmap bitmap;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-   //    Intent intent=new Intent(this,IGlassService.class);
-   //    startService(intent);
-
-
+/*
         DisplayManager displayManager = (DisplayManager)   this.getSystemService(Context.DISPLAY_SERVICE);
         //获取屏幕数量
         presentationDisplays = displayManager.getDisplays();
@@ -101,6 +105,9 @@ public class MainActivity extends Activity{
             presentation = new DifferentDisplay(this, presentationDisplays[1]);
             presentation.show();
         }
+
+*/
+
 
         setUpViews();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
@@ -244,6 +251,7 @@ public class MainActivity extends Activity{
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpTimer();
+        checkDrawOverlayPermission();
         Log.i("开始","开始啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -261,6 +269,7 @@ public class MainActivity extends Activity{
             playerTimer.stop();
             playerTimer.removeMessages(0);
         }
+        stopService(secondScreen);
         Log.i("破坏","被破坏啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -462,5 +471,35 @@ public class MainActivity extends Activity{
         final ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         scrollview_controller.setVisibility(View.VISIBLE);
         openControl.setVisibility(View.GONE);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void checkDrawOverlayPermission() {
+        /** check if we already  have permission to draw over other apps */
+        if (!Settings.canDrawOverlays(this)) {
+            /** if not construct intent to request permission */
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            /** request permission via start activity for result */
+            startActivityForResult(intent, REQUEST_CODE);
+        }else{
+            secondScreen=new Intent(this,IGlassService.class);
+            startService(secondScreen);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
+        /** check if received result code
+         is equal our requested code for draw permission  */
+        if (requestCode == REQUEST_CODE) {
+       /* * if so check once again if we have permission */
+            if (Settings.canDrawOverlays(this)) {
+                // continue here - permission was granted
+                secondScreen=new Intent(this,IGlassService.class);
+                startService(secondScreen);
+            }
+        }
     }
 }
