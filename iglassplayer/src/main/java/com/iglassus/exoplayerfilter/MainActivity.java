@@ -1,10 +1,10 @@
 package com.iglassus.exoplayerfilter;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Presentation;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,7 +28,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.VideoView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.Player;
 import com.iglassus.epf.EPlayerView;
@@ -62,7 +61,7 @@ import java.util.List;
 
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
-    Intent secondScreen;
+    public Intent secondScreenService;
 
     public static EPlayerView ePlayerView;
     public static MovieWrapperView movieWrapperView;
@@ -70,7 +69,6 @@ public class MainActivity extends Activity{
     private Button playPause,openControl;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
-    private DifferentDisplay presentation;
     private Display[] presentationDisplays;
 
     // for file chooser
@@ -92,11 +90,40 @@ public class MainActivity extends Activity{
     final static FilterType filterType = FilterType.IGLASS;
     private Bitmap bitmap;
 
+
+    private final BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.M)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            if (intent.getAction().equals("android.hardware.usb.action.USB_STATE")) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Do something after 100ms
+                        checkGlassExistence();
+                    }
+                }, 2000);
+/*
+                if (intent.getExtras().getBoolean("connected")) {
+                    // usb 插入
+                    //Toast.makeText(MainActivity.this, "usb 插入", Toast.LENGTH_SHORT).show();
+                } else {
+                    //   usb 拔出
+                    //Toast.makeText(MainActivity.this, "usb 拔出", Toast.LENGTH_SHORT).show();
+                }
+                */
+            }
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUpViews();
 /*
         DisplayManager displayManager = (DisplayManager)   this.getSystemService(Context.DISPLAY_SERVICE);
         //获取屏幕数量
@@ -108,10 +135,13 @@ public class MainActivity extends Activity{
 
 */
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.hardware.usb.action.USB_STATE");
+        registerReceiver(broadcastReceiver, intentFilter);
 
-        setUpViews();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
+        movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
 
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
@@ -251,7 +281,8 @@ public class MainActivity extends Activity{
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpTimer();
-        checkDrawOverlayPermission();
+        checkGlassExistence();
+
         Log.i("开始","开始啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -269,7 +300,9 @@ public class MainActivity extends Activity{
             playerTimer.stop();
             playerTimer.removeMessages(0);
         }
-        stopService(secondScreen);
+        stopService(secondScreenService);
+        secondScreenService =null;
+        unregisterReceiver(broadcastReceiver);
         Log.i("破坏","被破坏啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -329,7 +362,6 @@ public class MainActivity extends Activity{
             }
 
         });
-
     }
 
     private void setUpSimpleExoPlayer() {
@@ -356,12 +388,9 @@ public class MainActivity extends Activity{
                 .density;
         int topBarHeight = Math.round(density * 36);
 
-        MovieWrapperView movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
-
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        movieWrapperView.addView(ePlayerView);
         ePlayerView.onResume();
 
         // ScrollView is accessed from the inner class. need to be delcared final
@@ -478,16 +507,13 @@ public class MainActivity extends Activity{
         /** check if we already  have permission to draw over other apps */
         if (!Settings.canDrawOverlays(this)) {
             /** if not construct intent to request permission */
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
             /** request permission via start activity for result */
             startActivityForResult(intent, REQUEST_CODE);
         }else{
-            secondScreen=new Intent(this,IGlassService.class);
-            startService(secondScreen);
+            startGlass();
         }
     }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
@@ -497,9 +523,31 @@ public class MainActivity extends Activity{
        /* * if so check once again if we have permission */
             if (Settings.canDrawOverlays(this)) {
                 // continue here - permission was granted
-                secondScreen=new Intent(this,IGlassService.class);
-                startService(secondScreen);
-            }
+                startGlass();
+            }else movieWrapperView.addView(ePlayerView);
+        }
+    }
+    private void startGlass() {
+        if (secondScreenService == null) secondScreenService = new Intent(this, IGlassService.class);
+        stopService(secondScreenService);
+        startService(secondScreenService);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void checkGlassExistence(){
+        ViewGroup viewGroup= (ViewGroup) ePlayerView.getParent();
+        if(viewGroup!=null) viewGroup.removeAllViews();
+        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        DisplayManager mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        Display[] displays=mDisplayManager.getDisplays();
+        if(displays.length>1){
+            //Toast.makeText(MainActivity.this, "检测到屏幕", Toast.LENGTH_SHORT).show();
+            checkDrawOverlayPermission();
+        }else {
+            //Toast.makeText(MainActivity.this, "没有检测到屏幕", Toast.LENGTH_SHORT).show();
+            if(secondScreenService !=null) stopService(secondScreenService);
+            movieWrapperView.addView(ePlayerView);
         }
     }
 }
