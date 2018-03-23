@@ -1,7 +1,6 @@
 package com.iglassus.exoplayerfilter;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,7 +22,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -66,7 +64,7 @@ public class MainActivity extends Activity{
     public static EPlayerView ePlayerView;
     public static MovieWrapperView movieWrapperView;
     private SimpleExoPlayer player;
-    private Button playPause,openControl;
+    private Button playPause, unLock;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
 
@@ -111,8 +109,8 @@ public class MainActivity extends Activity{
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
         // https://bradmartin.net/2016/03/10/fullscreen-and-navigation-bar-color-in-a-nativescript-android-app/
-        openControl=findViewById(R.id.openControl);
-        openControl.setVisibility(View.GONE);
+        unLock =findViewById(R.id.unLock);
+        unLock.setVisibility(View.GONE);
         View decorView = getWindow().getDecorView();
         int uiOptions =  View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -199,8 +197,6 @@ public class MainActivity extends Activity{
                 player.setPlayWhenReady(true);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
                 playPause.setText(R.string.pause);
-
-
             }
         });
 
@@ -375,12 +371,12 @@ public class MainActivity extends Activity{
             public void onClick(View v)
             {
                 //scrollview_controller.setVisibility(View.VISIBLE);
-                if(openControl.getVisibility()==View.VISIBLE){
-                    openControl.setVisibility(View.GONE);
+                if(unLock.getVisibility()==View.VISIBLE){
+                    unLock.setVisibility(View.GONE);
                     return;
                 }
-                openControl.setVisibility(View.VISIBLE);
-                openControl.bringToFront();
+                unLock.setVisibility(View.VISIBLE);
+                unLock.bringToFront();
             }
         });
     }
@@ -464,10 +460,10 @@ public class MainActivity extends Activity{
         startActivity(intent);
     }
 
-    public void openControlPanel(View view) {
+    public void unLock(View view) {
         final ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         scrollview_controller.setVisibility(View.VISIBLE);
-        openControl.setVisibility(View.GONE);
+        unLock.setVisibility(View.GONE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)

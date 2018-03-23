@@ -6,12 +6,12 @@
 
 
     <Button
-        android:id="@+id/openControl"
+        android:id="@+id/unLock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Unlock"
         android:layout_margin="4dp"
-        android:onClick="openControlPanel"/>
+        android:onClick="unLock"/>
 
     <com.iglassus.exoplayerfilter.MovieWrapperView
         android:id="@+id/layout_movie_wrapper"
