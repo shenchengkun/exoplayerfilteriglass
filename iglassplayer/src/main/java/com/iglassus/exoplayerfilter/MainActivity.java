@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -23,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -57,11 +57,11 @@ import com.xw.repo.BubbleSeekBar;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Scanner;
 
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
-    public Intent secondScreenService;
+    public Intent glassService;
 
     public static EPlayerView ePlayerView;
     public static MovieWrapperView movieWrapperView;
@@ -69,7 +69,6 @@ public class MainActivity extends Activity{
     private Button playPause,openControl;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
-    private Display[] presentationDisplays;
 
     // for file chooser
     DialogProperties properties = new DialogProperties();
@@ -89,55 +88,21 @@ public class MainActivity extends Activity{
     private VideoViewFilterParams videoViewFilterParams;
     final static FilterType filterType = FilterType.IGLASS;
     private Bitmap bitmap;
-
-
-    private final BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
-        @RequiresApi(api = Build.VERSION_CODES.M)
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            if (intent.getAction().equals("android.hardware.usb.action.USB_STATE")) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Do something after 100ms
-                        checkGlassExistence();
-                    }
-                }, 2000);
-/*
-                if (intent.getExtras().getBoolean("connected")) {
-                    // usb 插入
-                    //Toast.makeText(MainActivity.this, "usb 插入", Toast.LENGTH_SHORT).show();
-                } else {
-                    //   usb 拔出
-                    //Toast.makeText(MainActivity.this, "usb 拔出", Toast.LENGTH_SHORT).show();
-                }
-                */
-            }
-        }
-    };
+    public DisplayManager mDisplayManager;
+    public Display[] displays;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setUpViews();
-/*
-        DisplayManager displayManager = (DisplayManager)   this.getSystemService(Context.DISPLAY_SERVICE);
-        //获取屏幕数量
-        presentationDisplays = displayManager.getDisplays();
-        if (presentationDisplays.length >1) {
-            presentation = new DifferentDisplay(this, presentationDisplays[1]);
-            presentation.show();
+
+        mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        displays=mDisplayManager.getDisplays();
+        if(displays.length<=1) {
+            //Toast.makeText(this,"未检测到眼镜",Toast.LENGTH_LONG).show();
+            finishAndRemoveTask ();
         }
-
-*/
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.hardware.usb.action.USB_STATE");
-        registerReceiver(broadcastReceiver, intentFilter);
 
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
@@ -278,11 +243,11 @@ public class MainActivity extends Activity{
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
         });
+        setUpViews();
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpTimer();
-        checkGlassExistence();
-
+        castMovieToGlass();
         Log.i("开始","开始啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -291,7 +256,16 @@ public class MainActivity extends Activity{
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
         filePickerDialog.show();
     }
-
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        displays=mDisplayManager.getDisplays();
+        if(displays.length<=1) {
+            //Toast.makeText(this,"未检测到眼镜",Toast.LENGTH_LONG).show();
+            finishAndRemoveTask ();
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -300,9 +274,7 @@ public class MainActivity extends Activity{
             playerTimer.stop();
             playerTimer.removeMessages(0);
         }
-        stopService(secondScreenService);
-        secondScreenService =null;
-        unregisterReceiver(broadcastReceiver);
+        if(glassService !=null) stopService(glassService);
         Log.i("破坏","被破坏啦啦啦啦啦绿绿绿绿绿");
     }
 
@@ -390,8 +362,9 @@ public class MainActivity extends Activity{
 
         ePlayerView = new EPlayerView(this);
         ePlayerView.setSimpleExoPlayer(player);
-        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        ePlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         ePlayerView.onResume();
+        //movieWrapperView.addView(ePlayerView);
 
         // ScrollView is accessed from the inner class. need to be delcared final
         // can move scrollview_controller inside the onClick
@@ -461,11 +434,6 @@ public class MainActivity extends Activity{
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    private void showSystemUI() {
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
     private final Handler mHideHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -524,30 +492,41 @@ public class MainActivity extends Activity{
             if (Settings.canDrawOverlays(this)) {
                 // continue here - permission was granted
                 startGlass();
-            }else movieWrapperView.addView(ePlayerView);
+            }else{
+                Toast.makeText(this,"没有权限！",Toast.LENGTH_LONG);
+                finishAndRemoveTask();
+            }
         }
     }
     private void startGlass() {
-        if (secondScreenService == null) secondScreenService = new Intent(this, IGlassService.class);
-        stopService(secondScreenService);
-        startService(secondScreenService);
+        glassService = new Intent(this, IGlassService.class);
+        startService(glassService);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private void checkGlassExistence(){
-        ViewGroup viewGroup= (ViewGroup) ePlayerView.getParent();
-        if(viewGroup!=null) viewGroup.removeAllViews();
-        ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        DisplayManager mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
-        Display[] displays=mDisplayManager.getDisplays();
-        if(displays.length>1){
-            //Toast.makeText(MainActivity.this, "检测到屏幕", Toast.LENGTH_SHORT).show();
+    private void castMovieToGlass(){
+        //ViewGroup viewGroup= (ViewGroup) ePlayerView.getParent();
+        //if(viewGroup!=null) viewGroup.removeAllViews();
+        //ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if(displays.length>1) {
+            //Toast.makeText(MainActivity.this, "检测到眼镜", Toast.LENGTH_SHORT).show();
             checkDrawOverlayPermission();
-        }else {
-            //Toast.makeText(MainActivity.this, "没有检测到屏幕", Toast.LENGTH_SHORT).show();
-            if(secondScreenService !=null) stopService(secondScreenService);
-            movieWrapperView.addView(ePlayerView);
+        }
+    }
+
+    public void testDisplays(View view) {
+        // The file '/sys/devices/virtual/switch/hdmi/state' holds an int -- if it's 1 then an HDMI device is connected.
+        // An alternative file to check is '/sys/class/switch/hdmi/state' which exists instead on certain devices.
+        File switchFile = new File("/sys/devices/virtual/switch/hdmi/state");
+        if (!switchFile.exists()) {
+            switchFile = new File("/sys/class/switch/hdmi/state");
+        }
+        try {
+            Scanner switchFileScanner = new Scanner(switchFile);
+            int switchValue = switchFileScanner.nextInt();
+            switchFileScanner.close();
+            Toast.makeText(MainActivity.this, (switchValue>0?String.valueOf(2):String.valueOf(1))+"个屏幕", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
         }
     }
 }

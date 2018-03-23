@@ -26,7 +26,6 @@ public class IGlassService extends Service {
         public void onCreate() {
             super.onCreate();
             Log.i("fd","发的发发的发发的方法的发放额凤飞飞飞");
-                //Toast.makeText(getApplicationContext(), "哈哈哈哈哈第二块屏幕", Toast.LENGTH_LONG).show();
             DisplayManager mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
             Display[] displays=mDisplayManager.getDisplays();
             mPresentation = new DifferentDisplay(getApplicationContext(),displays[1]);// displays[1]是副屏

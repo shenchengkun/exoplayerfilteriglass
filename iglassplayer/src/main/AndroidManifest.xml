@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.iglassus.exoplayerfilter">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -10,6 +11,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <!-- 在 屏幕最顶部显示addview-->
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+
+
+
 
     <application
         android:allowBackup="true"
@@ -23,6 +27,7 @@
             android:screenOrientation="landscape"
             android:theme="@style/PlayerTheme"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +37,12 @@
 
         <activity android:name=".YoutubeActivity" android:configChanges="keyboardHidden|orientation|screenSize" />
         <service android:enabled="true"  android:name=".IGlassService"/>
+
+        <receiver android:name=".UsbChangeNotification">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_STATE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

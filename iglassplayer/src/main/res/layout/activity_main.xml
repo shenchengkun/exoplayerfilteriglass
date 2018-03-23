@@ -229,6 +229,14 @@
                     android:text="Youtube"
                     android:onClick="openYoutube"/>
 
+                    <Button
+                        android:id="@+id/displays"
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Displays"
+                        android:onClick="testDisplays"/>
+
 
                 </LinearLayout>
 
