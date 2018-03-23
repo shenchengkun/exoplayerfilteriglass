@@ -364,7 +364,6 @@ public class MainActivity extends Activity{
 
         // ScrollView is accessed from the inner class. need to be delcared final
         // can move scrollview_controller inside the onClick
-        final ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         movieWrapperView.setOnClickListener(new View.OnClickListener()
         {
             @Override

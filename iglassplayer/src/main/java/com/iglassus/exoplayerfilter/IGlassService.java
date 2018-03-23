@@ -9,10 +9,7 @@ import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.WindowManager;
-import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class IGlassService extends Service {
@@ -32,9 +29,6 @@ public class IGlassService extends Service {
             mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             mPresentation.show();
         }
-
-
-
     /*
     TextView mView;
     @Override
