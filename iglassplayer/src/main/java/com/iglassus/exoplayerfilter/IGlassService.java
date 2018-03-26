@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Display;
@@ -26,7 +27,10 @@ public class IGlassService extends Service {
             DisplayManager mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
             Display[] displays=mDisplayManager.getDisplays();
             mPresentation = new DifferentDisplay(getApplicationContext(),displays[1]);// displays[1]是副屏
-            mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+
+            if(Build.VERSION.SDK_INT >= 26) mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            else mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+
             mPresentation.show();
         }
     /*

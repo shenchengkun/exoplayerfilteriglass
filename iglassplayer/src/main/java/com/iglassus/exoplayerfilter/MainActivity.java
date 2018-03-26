@@ -1,5 +1,6 @@
 package com.iglassus.exoplayerfilter;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -90,8 +91,6 @@ public class MainActivity extends Activity{
     public DisplayManager mDisplayManager;
     public Display[] displays;
 
-    @TargetApi(Build.VERSION_CODES.O)
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -460,7 +459,8 @@ public class MainActivity extends Activity{
         unLock.setVisibility(View.GONE);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    //@RequiresApi(api = Build.VERSION_CODES.M)
+    @SuppressLint("NewApi")
     public void checkDrawOverlayPermission() {
         /** check if we already  have permission to draw over other apps */
         if (!Settings.canDrawOverlays(this)) {
@@ -472,7 +472,8 @@ public class MainActivity extends Activity{
             startGlass();
         }
     }
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
+    @SuppressLint("NewApi")
     @Override
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
         /** check if received result code
@@ -493,7 +494,6 @@ public class MainActivity extends Activity{
         startService(glassService);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void castMovieToGlass(){
         //ViewGroup viewGroup= (ViewGroup) ePlayerView.getParent();
         //if(viewGroup!=null) viewGroup.removeAllViews();
