@@ -22,11 +22,11 @@ public class IGlassService extends Service {
         @Override
         public void onCreate() {
             super.onCreate();
-            Log.i("fd","发的发发的发发的方法的发放额凤飞飞飞");
+            Log.i("服务service","开始服务");
             DisplayManager mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
             Display[] displays=mDisplayManager.getDisplays();
             mPresentation = new DifferentDisplay(getApplicationContext(),displays[1]);// displays[1]是副屏
-            mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            mPresentation.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
             mPresentation.show();
         }
     /*

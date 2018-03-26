@@ -1,5 +1,6 @@
 package com.iglassus.exoplayerfilter;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -89,18 +90,12 @@ public class MainActivity extends Activity{
     public DisplayManager mDisplayManager;
     public Display[] displays;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
-        displays=mDisplayManager.getDisplays();
-        if(displays.length<=1) {
-            //Toast.makeText(this,"未检测到眼镜",Toast.LENGTH_LONG).show();
-            finishAndRemoveTask ();
-        }
 
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
@@ -244,7 +239,7 @@ public class MainActivity extends Activity{
         setUoGlPlayerView();
         setUpTimer();
         castMovieToGlass();
-        Log.i("开始","开始啦啦啦啦啦绿绿绿绿绿");
+        Log.i("开始","activity开始了");
     }
 
     // END: protected void onCreate(Bundle savedInstanceState)
@@ -258,7 +253,7 @@ public class MainActivity extends Activity{
         mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
         displays=mDisplayManager.getDisplays();
         if(displays.length<=1) {
-            //Toast.makeText(this,"未检测到眼镜",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"眼镜拔出",Toast.LENGTH_LONG).show();
             finishAndRemoveTask ();
         }
     }
@@ -271,7 +266,7 @@ public class MainActivity extends Activity{
             playerTimer.removeMessages(0);
         }
         if(glassService !=null) stopService(glassService);
-        Log.i("破坏","被破坏啦啦啦啦啦绿绿绿绿绿");
+        Log.i("破坏","activity被破坏了");
     }
 
     private void setUpViews() {
@@ -465,7 +460,7 @@ public class MainActivity extends Activity{
         unLock.setVisibility(View.GONE);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void checkDrawOverlayPermission() {
         /** check if we already  have permission to draw over other apps */
         if (!Settings.canDrawOverlays(this)) {
@@ -477,7 +472,7 @@ public class MainActivity extends Activity{
             startGlass();
         }
     }
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
         /** check if received result code
@@ -498,13 +493,20 @@ public class MainActivity extends Activity{
         startService(glassService);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void castMovieToGlass(){
         //ViewGroup viewGroup= (ViewGroup) ePlayerView.getParent();
         //if(viewGroup!=null) viewGroup.removeAllViews();
         //ePlayerView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        if(displays.length>1) {
-            //Toast.makeText(MainActivity.this, "检测到眼镜", Toast.LENGTH_SHORT).show();
+        mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        displays=mDisplayManager.getDisplays();
+        if(displays.length<=1) {
+            Toast.makeText(this,"未检测到眼镜",Toast.LENGTH_LONG).show();
+            Log.i("未检测到","未检测到眼镜");
+            finishAndRemoveTask ();
+        } else {
+            Toast.makeText(MainActivity.this, "检测到眼镜", Toast.LENGTH_SHORT).show();
+            Log.i("检测到","检测到眼镜");
             checkDrawOverlayPermission();
         }
     }
