@@ -237,6 +237,14 @@
                         android:text="Displays"
                         android:onClick="testDisplays"/>
 
+                    <Button
+                        android:id="@+id/usbInfo"
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Usb"
+                        android:onClick="usbInfo"/>
+
 
                 </LinearLayout>
 
@@ -277,7 +285,6 @@
                     android:inputType="number"
                     android:text="1080"
                     android:visibility="gone" />
-
 
             </LinearLayout>
 

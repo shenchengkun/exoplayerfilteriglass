@@ -3,17 +3,21 @@ package com.iglassus.exoplayerfilter;
 import android.app.Presentation;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by AdminUser on 3/20/2018.
  */
 
-public class DifferentDisplay extends Presentation {
+public class DisplayPresentation extends Presentation {
     ImageView imageView;
 
-    public DifferentDisplay(Context outerContext, Display display) {
+    public DisplayPresentation(Context outerContext, Display display) {
         super(outerContext, display);
     }
 
@@ -26,6 +30,7 @@ public class DifferentDisplay extends Presentation {
         movieWrapperView.addView(MainActivity.ePlayerView);
         imageView=new ImageView(getContext());
         imageView.setImageResource(R.drawable.cat);
+
         //movieWrapperView.addView(imageView);
 
     }

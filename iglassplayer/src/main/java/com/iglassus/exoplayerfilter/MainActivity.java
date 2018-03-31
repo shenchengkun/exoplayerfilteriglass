@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -56,6 +59,7 @@ import com.xw.repo.BubbleSeekBar;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -95,6 +99,7 @@ public class MainActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        UsbChangeNotification.appIsRunning=true;
 
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
@@ -259,6 +264,7 @@ public class MainActivity extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        UsbChangeNotification.appIsRunning=false;
         releasePlayer();
         if (playerTimer != null) {
             playerTimer.stop();
@@ -447,8 +453,8 @@ public class MainActivity extends Activity{
     }
 
     public void openYoutube(View view) {
-        player.setPlayWhenReady(false);
-        playPause.setText(R.string.play);
+        //player.setPlayWhenReady(false);
+        //playPause.setText(R.string.play);
         Intent intent=new Intent(this,YoutubeActivity.class);
         startActivity(intent);
     }
@@ -511,9 +517,11 @@ public class MainActivity extends Activity{
         }
     }
 
+    @SuppressLint("NewApi")
     public void testDisplays(View view) {
         // The file '/sys/devices/virtual/switch/hdmi/state' holds an int -- if it's 1 then an HDMI device is connected.
         // An alternative file to check is '/sys/class/switch/hdmi/state' which exists instead on certain devices.
+        /*
         File switchFile = new File("/sys/devices/virtual/switch/hdmi/state");
         if (!switchFile.exists()) {
             switchFile = new File("/sys/class/switch/hdmi/state");
@@ -524,6 +532,21 @@ public class MainActivity extends Activity{
             switchFileScanner.close();
             Toast.makeText(MainActivity.this, (switchValue>0?String.valueOf(2):String.valueOf(1))+"个屏幕", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-        }
+        }*/
+        mDisplayManager= (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        displays=mDisplayManager.getDisplays();
+        DisplayMetrics metrics =new DisplayMetrics();
+        displays[1].getRealMetrics(metrics);
+        float rate=displays[1].getRefreshRate();
+        Display.Mode[] modes=displays[1].getSupportedModes();
+        Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+String.valueOf(rate)+"\n"+String.valueOf(modes),Toast.LENGTH_LONG).show();
+    }
+
+    public void usbInfo(View view) {
+
+        UsbManager mUsbManager=(UsbManager)getSystemService(Context.USB_SERVICE);
+        HashMap<String,UsbDevice> deviceHashMap = mUsbManager.getDeviceList();
+        //Toast.makeText(getApplicationContext(), (CharSequence) deviceHashMap,Toast.LENGTH_LONG).show();
+
     }
 }

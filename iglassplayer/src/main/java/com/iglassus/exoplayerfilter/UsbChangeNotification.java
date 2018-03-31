@@ -11,6 +11,7 @@ import android.widget.Toast;
  */
 
 public class UsbChangeNotification extends BroadcastReceiver {
+    public static boolean appIsRunning=false;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -27,6 +28,7 @@ public class UsbChangeNotification extends BroadcastReceiver {
                 //Toast.makeText(context, "USB 设备拔出或关闭", Toast.LENGTH_SHORT).show();
             }
         }
+
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
