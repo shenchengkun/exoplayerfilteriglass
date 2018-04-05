@@ -77,17 +77,17 @@ public class MainActivity extends Activity{
     // for file chooser
     DialogProperties properties = new DialogProperties();
     FilePickerDialog filePickerDialog;
-    VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format1D;
+    VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format2D;
 
     // for videoFileReformatter
     String inputVideoFilePath;
 
     // padding of the frame image relative to the video player view window
-    private float bsk_upperpadding_percentage = 0.0f;
-    private float bsk_bottompadding_percentage = 0.0f;
+    private float bsk_upperpadding_percentage = 0.07f;
+    private float bsk_bottompadding_percentage = 0.20f;
     private float bsk_leftrightpadding_percentage = 0.0f;
     private float bsk_middlepadding_percentage = 0.0f;
-    private boolean flip=false;
+    private boolean flip=true;
     private boolean distortion=false;
     private VideoViewFilterParams videoViewFilterParams;
     final static FilterType filterType = FilterType.IGLASS;
@@ -122,7 +122,7 @@ public class MainActivity extends Activity{
         // spinner to choose the frame size
         Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
         List<String> image2dor3dformaList = new ArrayList<String>();
-        image2dor3dformaList.add("1D format");
+        //image2dor3dformaList.add("1D format");
         image2dor3dformaList.add("2D format");
         image2dor3dformaList.add("3D format");
         {
@@ -137,10 +137,8 @@ public class MainActivity extends Activity{
                                        int pos, long id) {
                 // On selecting a spinner item
                 if (pos == 0) {
-                    frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format1D;
-                } else if (pos == 1) {
                     frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
-                } else if (pos == 2) {
+                } else {
                     frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
                 }
                 videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
@@ -191,6 +189,7 @@ public class MainActivity extends Activity{
                 // My Option to use File Chooser: inputVideoFilePath
                 // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
                 MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
+                //videoSource = new ExtractorMediaSource(Uri.parse("rtsp://v8.cache1.c.youtube.com/CiILENy73wIaGQnxa4t5p6BVTxMYESARFEgGUgZ2aWRlb3MM/0/0/0/video.3gp"), dataSourceFactory, extractorsFactory, null, null);
                 // Prepare the player with the source.
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
@@ -453,10 +452,9 @@ public class MainActivity extends Activity{
     }
 
     public void openYoutube(View view) {
-        //player.setPlayWhenReady(false);
-        //playPause.setText(R.string.play);
-        Intent intent=new Intent(this,YoutubeActivity.class);
-        startActivity(intent);
+
+        //Intent intent=new Intent(this,YoutubeActivity.class);
+        //startActivity(intent);
     }
 
     public void unLock(View view) {
@@ -538,15 +536,7 @@ public class MainActivity extends Activity{
         DisplayMetrics metrics =new DisplayMetrics();
         displays[1].getRealMetrics(metrics);
         float rate=displays[1].getRefreshRate();
-        Display.Mode[] modes=displays[1].getSupportedModes();
-        Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+String.valueOf(rate)+"\n"+String.valueOf(modes),Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+"Frequency{"+String.valueOf(rate)+"}",Toast.LENGTH_LONG).show();
     }
 
-    public void usbInfo(View view) {
-
-        UsbManager mUsbManager=(UsbManager)getSystemService(Context.USB_SERVICE);
-        HashMap<String,UsbDevice> deviceHashMap = mUsbManager.getDeviceList();
-        //Toast.makeText(getApplicationContext(), (CharSequence) deviceHashMap,Toast.LENGTH_LONG).show();
-
-    }
 }

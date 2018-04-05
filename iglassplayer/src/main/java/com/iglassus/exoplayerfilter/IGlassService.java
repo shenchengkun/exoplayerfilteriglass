@@ -73,6 +73,9 @@ public class IGlassService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mPresentation != null) {
+            mPresentation.cancel();
+            mPresentation.dismiss();
+            mPresentation.onDetachedFromWindow();
             mPresentation = null;
         }
     }

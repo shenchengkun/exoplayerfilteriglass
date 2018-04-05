@@ -43,11 +43,11 @@ void main() {
 
   //distortion
   if(distortion>0.5){
-    vec2 polarBase=toPolar(vec2(-0.375,0.85*3.0));                           //矩形扇形坐标变换
-    vec2 polarCur=toPolar(vec2(x-0.5,y+0.85*3.0));
+    vec2 polarBase=toPolar(vec2(-0.4,3.6));                           //矩形扇形坐标变换
+    vec2 polarCur=toPolar(vec2(x-0.5,y+3.6));
     float baseR=polarBase.x,baseTheta=polarBase.y,curR=polarCur.x,curTheta=polarCur.y;
 
-    highp vec2 p2=vec2((baseTheta-curTheta)/(2.0*baseTheta-3.1415926),3.0*(curR/baseR-1.0));
+    highp vec2 p2=vec2((baseTheta-curTheta)/(2.0*baseTheta-3.1415926),4.0*(curR/baseR-1.0));
     if (all(greaterThanEqual(p2, vec2(0.0)))&&all(lessThanEqual(p2, vec2(1.0)))){
         x = p2.x;
         y = p2.y;

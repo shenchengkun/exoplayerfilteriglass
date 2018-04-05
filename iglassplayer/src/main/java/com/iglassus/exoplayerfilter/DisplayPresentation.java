@@ -30,7 +30,6 @@ public class DisplayPresentation extends Presentation {
         movieWrapperView.addView(MainActivity.ePlayerView);
         imageView=new ImageView(getContext());
         imageView.setImageResource(R.drawable.cat);
-
         //movieWrapperView.addView(imageView);
 
     }
