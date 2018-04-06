@@ -36,6 +36,8 @@ public class EPlayerView extends GLSurfaceView implements SimpleExoPlayer.VideoL
 
         renderer = new EPlayerRenderer(this);
         setRenderer(renderer);
+        SurfaceHolder surfaceHolder=this.getHolder();
+        surfaceHolder.setFixedSize(3000,1500);
 
     }
 
@@ -72,11 +74,11 @@ public class EPlayerView extends GLSurfaceView implements SimpleExoPlayer.VideoL
                 viewWidth = (int) (measuredHeight * videoAspect);
                 break;
         }
-        setMeasuredDimension(viewWidth, viewHeight);
+        //setMeasuredDimension(viewWidth, viewHeight);
 
-        //int width = getDefaultSize(0, widthMeasureSpec);//得到默认的大小（0，宽度测量规范）
-        //int height = getDefaultSize(0, heightMeasureSpec);//得到默认的大小（0，高度度测量规范）
-        //setMeasuredDimension(width, height); //设置测量尺寸,将高和宽放进去
+        int width = getDefaultSize(0, widthMeasureSpec);//得到默认的大小（0，宽度测量规范）
+        int height = getDefaultSize(0, heightMeasureSpec);//得到默认的大小（0，高度度测量规范）
+        setMeasuredDimension(width, height); //设置测量尺寸,将高和宽放进去
     }
 
     //////////////////////////////////////////////////////////////////////////

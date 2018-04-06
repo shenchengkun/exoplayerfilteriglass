@@ -83,8 +83,8 @@ public class MainActivity extends Activity{
     String inputVideoFilePath;
 
     // padding of the frame image relative to the video player view window
-    private float bsk_upperpadding_percentage = 0.07f;
-    private float bsk_bottompadding_percentage = 0.20f;
+    private float bsk_upperpadding_percentage = 0.0f;
+    private float bsk_bottompadding_percentage = 0.0f;
     private float bsk_leftrightpadding_percentage = 0.0f;
     private float bsk_middlepadding_percentage = 0.0f;
     private boolean flip=true;
@@ -355,7 +355,7 @@ public class MainActivity extends Activity{
                 .density;
         int topBarHeight = Math.round(density * 36);
 
-        ePlayerView = new EPlayerView(this);
+        ePlayerView = new EPlayerView(this.getApplicationContext());
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         ePlayerView.onResume();

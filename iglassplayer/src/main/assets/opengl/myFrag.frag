@@ -1,5 +1,5 @@
 #extension GL_OES_EGL_image_external : require
-precision mediump float;
+precision highp float;
 
 uniform float upperPadding_percentage;
 uniform float bottomPadding_percentage;
@@ -10,7 +10,7 @@ uniform float distortion;
 uniform float dup;
 
 varying vec2 vTextureCoord;
-uniform lowp sampler2D sTexture;
+uniform highp sampler2D sTexture;
 
 vec2 toPolar(vec2 point) {
     float r = length(point);
