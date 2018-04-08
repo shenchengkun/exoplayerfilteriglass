@@ -453,8 +453,8 @@ public class MainActivity extends Activity{
 
     public void openYoutube(View view) {
 
-        //Intent intent=new Intent(this,YoutubeActivity.class);
-        //startActivity(intent);
+        Intent intent=new Intent(this,YoutubeActivity.class);
+        startActivity(intent);
     }
 
     public void unLock(View view) {

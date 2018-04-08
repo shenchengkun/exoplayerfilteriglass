@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".YoutubeActivity" android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity android:name=".YoutubeActivity" android:configChanges="keyboardHidden|orientation|screenSize" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
         <service android:enabled="true"  android:name=".IGlassService"/>
 
         <receiver android:name=".UsbChangeNotification">
