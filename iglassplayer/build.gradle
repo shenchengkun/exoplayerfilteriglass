@@ -28,5 +28,9 @@ dependencies {
     // https://github.com/woxingxiao/BubbleSeekBar
     compile 'com.xw.repo:bubbleseekbar:3.14-lite'
     compile project(':epf')
+
+    //compile 'com.github.evgenyneu:js-evaluator-for-android:v4.0.0'
+    compile 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
+
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
 }

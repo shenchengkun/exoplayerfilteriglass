@@ -20,6 +20,7 @@ import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,8 +64,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import at.huber.youtubeExtractor.YouTubeUriExtractor;
+import at.huber.youtubeExtractor.YtFile;
+
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
+    public static int itag=22;
     public Intent glassService;
 
     public static EPlayerView ePlayerView;
@@ -94,6 +99,7 @@ public class MainActivity extends Activity{
     private Bitmap bitmap;
     public DisplayManager mDisplayManager;
     public Display[] displays;
+    private String testURL="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +107,7 @@ public class MainActivity extends Activity{
         setContentView(R.layout.activity_main);
         UsbChangeNotification.appIsRunning=true;
 
+        getURI("rUOgEfE9Cf4",false);
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
         movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
@@ -189,7 +196,7 @@ public class MainActivity extends Activity{
                 // My Option to use File Chooser: inputVideoFilePath
                 // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
                 MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
-                //videoSource = new ExtractorMediaSource(Uri.parse("rtsp://v8.cache1.c.youtube.com/CiILENy73wIaGQnxa4t5p6BVTxMYESARFEgGUgZ2aWRlb3MM/0/0/0/video.3gp"), dataSourceFactory, extractorsFactory, null, null);
+                videoSource = new ExtractorMediaSource(Uri.parse(testURL), dataSourceFactory, extractorsFactory, null, null);
                 // Prepare the player with the source.
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
@@ -537,6 +544,55 @@ public class MainActivity extends Activity{
         displays[1].getRealMetrics(metrics);
         float rate=displays[1].getRefreshRate();
         Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+"Frequency{"+String.valueOf(rate)+"}",Toast.LENGTH_LONG).show();
+    }
+
+    void getURI(String id, boolean is360) {
+        if (!false) {
+            String youtubeLink = "http://youtube.com/watch?v=" + id;
+            final String str = id;
+            final boolean z = is360;
+            YouTubeUriExtractor ytEx = new YouTubeUriExtractor(this) {
+                public void onUrisAvailable(String videoId, String videoTitle, SparseArray<YtFile> ytFiles) {
+                    String downloadUrl = "";
+                    if (ytFiles != null) {
+                        ArrayList<Integer> key = new ArrayList();
+                        for (int i = 0; i < ytFiles.size(); i++) {
+                            key.add(Integer.valueOf(ytFiles.keyAt(i)));
+                            System.out.println(key.get(i));
+                        }
+                        if (key.contains(Integer.valueOf(MainActivity.itag))) {
+                            downloadUrl = ((YtFile) ytFiles.get(MainActivity.itag)).getUrl();
+                        } else if (key.contains(Integer.valueOf(18))) {
+                            downloadUrl = ((YtFile) ytFiles.get(18)).getUrl();
+                        } else if (key.contains(Integer.valueOf(22))) {
+                            downloadUrl = ((YtFile) ytFiles.get(22)).getUrl();
+                        } else if (key.contains(Integer.valueOf(36))) {
+                            downloadUrl = ((YtFile) ytFiles.get(36)).getUrl();
+                        } else if (key.contains(Integer.valueOf(17))) {
+                            downloadUrl = ((YtFile) ytFiles.get(17)).getUrl();
+                        } else {
+                        }
+                        System.out.println("Url------------>>> :" + downloadUrl);
+                        if (downloadUrl == null || downloadUrl.isEmpty()) {
+                            System.out.println("Download urL is null");
+                            return;
+                        } else if (z) {
+                            return;
+                        } else {
+                            //Intent intent = new Intent(SearchActivity.this, VideoPlayerActivity.class);
+                            //intent.putExtra(MainStarterActivity.vidId, downloadUrl);
+                            //SearchActivity.this.startActivity(intent);
+                            testURL=downloadUrl;
+                            Toast.makeText(getApplicationContext(),downloadUrl,Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    }
+                    System.out.println("YTFILES is null");
+                }
+            };
+            ytEx.setIncludeWebM(false);
+            ytEx.execute(new String[]{youtubeLink});
+        }
     }
 
 }
