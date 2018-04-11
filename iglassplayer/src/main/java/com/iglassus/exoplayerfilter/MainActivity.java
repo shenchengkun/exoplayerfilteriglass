@@ -22,6 +22,8 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -39,6 +41,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.exoplayer2.Player;
+import com.google.android.gms.plus.PlusShare;
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
@@ -61,10 +64,14 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.iglassus.exoplayerfilter.youtubeData.DeveloperKey;
+import com.iglassus.exoplayerfilter.youtubeData.ListAdapter;
 import com.iglassus.exoplayerfilter.youtubeData.data;
 import com.xw.repo.BubbleSeekBar;
 
 import org.apache.commons.lang3.CharEncoding;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,6 +126,8 @@ public class MainActivity extends Activity{
     private ArrayList<String> pages=new ArrayList<>();
     static String MyAcessTokenData = "access_token=";
     private SharedPreferences pref;
+    private RecyclerView mRecyclerView;
+    private ListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +136,9 @@ public class MainActivity extends Activity{
         UsbChangeNotification.appIsRunning=true;
 
         //getURI("rUOgEfE9Cf4",false);
+
+        this.mRecyclerView = (RecyclerView) findViewById(R.id.mlist);
+        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pref= this.pref = PreferenceManager.getDefaultSharedPreferences(this);
         client=new OkHttpClient();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
@@ -283,6 +295,7 @@ public class MainActivity extends Activity{
             }
         });
 
+        resetPages();
         new RunTask().execute(url(0),"0");
         Log.i("开始","activity开始了");
     }
@@ -647,7 +660,7 @@ public class MainActivity extends Activity{
         @Override
         protected List<data> doInBackground(String... strings) {
             int i;
-            if (strings[1].equals("0")) {
+            if (true||strings[1].equals("0")) {
                 MainActivity.this.resetPages();
             }
             String getData = "";
@@ -658,6 +671,60 @@ public class MainActivity extends Activity{
                 e.printStackTrace();
             }
             testJson=getData;
+            try {
+                JSONObject jSONObject = new JSONObject(getData);
+                if (jSONObject.isNull("nextPageToken")) {
+                    //SearchActivity.this.scroll = false;
+                } else {
+                    MainActivity.this.pages.add(jSONObject.getString("nextPageToken"));
+                    this.prescroll = true;
+                }
+                JSONArray mainArray = jSONObject.getJSONArray("items");
+                int maxResult = Math.min(jSONObject.getJSONObject("pageInfo").getInt("totalResults"), mainArray.length());
+                for (i = 0; i < maxResult; i++) {
+                    JSONObject mainObject0 = mainArray.getJSONObject(i);
+                    JSONObject sousObject1 = mainObject0.getJSONObject("snippet");
+                    String title = sousObject1.getString("title");
+                    String channeltitle = sousObject1.getString("channelTitle");
+                    String imageUrl = sousObject1.getJSONObject("thumbnails").getJSONObject("medium").getString(PlusShare.KEY_CALL_TO_ACTION_URL);
+                    String dates = sousObject1.getString("publishedAt");
+                    JSONObject idOBject1 = mainObject0.getJSONObject("id");
+                    String kind = idOBject1.getString("kind");
+                    if (kind.equals("youtube#video")) {
+                        String id = idOBject1.getString("videoId");
+                        this.myData.add(new data(imageUrl, title, channeltitle, dates, 0, id));
+                        idDuration = idDuration + id + ",";
+                    } else {
+                        if (kind.equals("youtube#channel")) {
+                            this.myData.add(new data(imageUrl, title, channeltitle, dates, 1, idOBject1.getString("channelId")));
+                        } else {
+                            if (kind.equals("youtube#playlist")) {
+                                this.myData.add(new data(imageUrl, title, channeltitle, dates, 2, idOBject1.getString("playlistId")));
+                            }
+                        }
+                    }
+                }
+            } catch (JSONException e3) {
+            } catch (NullPointerException e4) {
+            }
+            try {
+                JSONArray items = new JSONObject(MainActivity.this.getJson("https://www.googleapis.com/youtube/v3/videos?" + MainActivity.MyAcessTokenData + MainActivity.this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=contentDetails,statistics" + "&" + "id=" + idDuration + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA")).getJSONArray("items");
+                int kk = 0;
+                for (i = 0; i < this.myData.size(); i++) {
+                    if (((data) this.myData.get(i)).getType() == 0) {
+                        JSONObject child = items.getJSONObject(kk);
+                        ((data) this.myData.get(i)).setDuration(child.getJSONObject("contentDetails").getString("duration"));
+                        ((data) this.myData.get(i)).setCount(Long.parseLong(child.getJSONObject("statistics").getString("viewCount")));
+                        kk++;
+                    }
+                }
+            } catch (IOException e5) {
+                e5.printStackTrace();
+            } catch (NullPointerException e6) {
+            } catch (JSONException e7) {
+                e7.printStackTrace();
+            } catch (NumberFormatException e8) {
+            }
             return myData;
         }
 
@@ -665,6 +732,9 @@ public class MainActivity extends Activity{
         protected void onPostExecute(List<data> data) {
             Toast.makeText(getApplicationContext(),testJson,Toast.LENGTH_LONG).show();
             Log.i("json",testJson);
+            mAdapter = new ListAdapter(data);
+            mRecyclerView.setAdapter(mAdapter);
+            mAdapter.notifyDataSetChanged();
         }
     }
     String getJson(String url) throws IOException {
@@ -685,7 +755,7 @@ public class MainActivity extends Activity{
             }
             url = "https://www.googleapis.com/youtube/v3/search?" + MyAcessTokenData + this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=snippet"
                     //+ "&" + "pageToken=" + ((String) this.pages.get(pg)) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(this.f33q.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
-                    + "&" + "pageToken=" + "" + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode("cat", CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
+                    + "&" + "pageToken=" + this.pages.get(pg) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode("cat", CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
             return url;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
