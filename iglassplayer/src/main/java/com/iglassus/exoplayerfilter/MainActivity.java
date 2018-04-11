@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -742,10 +744,27 @@ public class MainActivity extends Activity{
     }
 
     private void newSearch(){
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        if (activeNetwork != null && activeNetwork.isConnected()) {
+            // notify user you are online
+        } else {
+            // notify user you are not online
+            return;
+        }
         new RunTask().execute(url(0),"0");
     }
 
     private void palyYoutubeWithID(String id, boolean is360) {
+
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        if (activeNetwork != null && activeNetwork.isConnected()) {
+            // notify user you are online
+        } else {
+            // notify user you are not online
+            return;
+        }
         if (!false) {
             String youtubeLink = "http://youtube.com/watch?v=" + id;
             final String str = id;
