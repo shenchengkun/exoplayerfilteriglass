@@ -27,10 +27,17 @@ dependencies {
     compile 'com.github.angads25:filepicker:1.1.1'
     // https://github.com/woxingxiao/BubbleSeekBar
     compile 'com.xw.repo:bubbleseekbar:3.14-lite'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile 'com.google.android.gms:play-services:8.1.0'
+    compile group: 'joda-time', name: 'joda-time', version: '2.3'
+    compile group:'com.squareup.picasso', name:'picasso', version:'2.5.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
+    compile 'com.google.vr:sdk-base:1.80.0'
     compile project(':epf')
 
     //compile 'com.github.evgenyneu:js-evaluator-for-android:v4.0.0'
     compile 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
 
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }

@@ -10,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Unlock"
+        android:visibility="gone"
         android:layout_margin="4dp"
         android:onClick="unLock"/>
 
@@ -284,5 +285,9 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <include layout="@layout/youtube_search"
+        android:visibility="gone"
+        android:id="@+id/youtubeSearchView"/>
 
 </FrameLayout>

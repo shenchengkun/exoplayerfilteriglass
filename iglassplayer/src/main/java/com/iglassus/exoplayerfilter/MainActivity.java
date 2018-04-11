@@ -3,8 +3,10 @@ package com.iglassus.exoplayerfilter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -12,10 +14,12 @@ import android.hardware.display.DisplayManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
@@ -56,16 +60,24 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.iglassus.exoplayerfilter.youtubeData.DeveloperKey;
+import com.iglassus.exoplayerfilter.youtubeData.data;
 import com.xw.repo.BubbleSeekBar;
 
+import org.apache.commons.lang3.CharEncoding;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 import at.huber.youtubeExtractor.YtFile;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
@@ -100,6 +112,13 @@ public class MainActivity extends Activity{
     public DisplayManager mDisplayManager;
     public Display[] displays;
     private String testURL="";
+    private View youtubeSearchView;
+    private Button youtubeGone;
+    private ScrollView scrollview_controller;
+    private OkHttpClient client;
+    private ArrayList<String> pages=new ArrayList<>();
+    static String MyAcessTokenData = "access_token=";
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +126,9 @@ public class MainActivity extends Activity{
         setContentView(R.layout.activity_main);
         UsbChangeNotification.appIsRunning=true;
 
-        getURI("rUOgEfE9Cf4",false);
+        //getURI("rUOgEfE9Cf4",false);
+        pref= this.pref = PreferenceManager.getDefaultSharedPreferences(this);
+        client=new OkHttpClient();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
         videoViewFilterParams = new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,bitmap);
         movieWrapperView = (MovieWrapperView) findViewById(R.id.layout_movie_wrapper);
@@ -196,7 +217,7 @@ public class MainActivity extends Activity{
                 // My Option to use File Chooser: inputVideoFilePath
                 // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
                 MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
-                videoSource = new ExtractorMediaSource(Uri.parse(testURL), dataSourceFactory, extractorsFactory, null, null);
+                //videoSource = new ExtractorMediaSource(Uri.parse(testURL), dataSourceFactory, extractorsFactory, null, null);
                 // Prepare the player with the source.
                 player.prepare(videoSource);
                 player.setPlayWhenReady(true);
@@ -249,6 +270,20 @@ public class MainActivity extends Activity{
         setUoGlPlayerView();
         setUpTimer();
         castMovieToGlass();
+
+        scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
+        youtubeSearchView=findViewById(R.id.youtubeSearchView);
+        youtubeGone=findViewById(R.id.youtubeGone);
+        youtubeGone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                youtubeSearchView.setVisibility(View.GONE);
+                scrollview_controller.setVisibility(View.VISIBLE);
+                movieWrapperView.setVisibility(View.VISIBLE);
+            }
+        });
+
+        new RunTask().execute(url(0),"0");
         Log.i("开始","activity开始了");
     }
 
@@ -287,7 +322,6 @@ public class MainActivity extends Activity{
         btn_controlvisibility.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ScrollView scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
                 scrollview_controller.setVisibility(View.GONE);
             }
         });
@@ -382,6 +416,7 @@ public class MainActivity extends Activity{
                 }
                 unLock.setVisibility(View.VISIBLE);
                 unLock.bringToFront();
+
             }
         });
     }
@@ -460,8 +495,12 @@ public class MainActivity extends Activity{
 
     public void openYoutube(View view) {
 
-        Intent intent=new Intent(this,YoutubeActivity.class);
-        startActivity(intent);
+        //Intent intent=new Intent(this,YoutubeActivity.class);
+        //startActivity(intent);
+        youtubeSearchView.setVisibility(View.VISIBLE);
+        youtubeSearchView.bringToFront();
+        scrollview_controller.setVisibility(View.GONE);
+        movieWrapperView.setVisibility(View.GONE);
     }
 
     public void unLock(View view) {
@@ -595,4 +634,69 @@ public class MainActivity extends Activity{
         }
     }
 
+    private class RunTask extends AsyncTask<String,String,List<data>>{
+        List<data> myData;
+        boolean prescroll;
+        String testJson="";
+
+        private RunTask() {
+            this.myData = new ArrayList();
+            this.prescroll = false;
+        }
+
+        @Override
+        protected List<data> doInBackground(String... strings) {
+            int i;
+            if (strings[1].equals("0")) {
+                MainActivity.this.resetPages();
+            }
+            String getData = "";
+            String idDuration = "";
+            try {
+                getData = MainActivity.this.getJson(strings[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            testJson=getData;
+            return myData;
+        }
+
+        @Override
+        protected void onPostExecute(List<data> data) {
+            Toast.makeText(getApplicationContext(),testJson,Toast.LENGTH_LONG).show();
+            Log.i("json",testJson);
+        }
+    }
+    String getJson(String url) throws IOException {
+
+        Response response = this.client.newCall(new Request.Builder().url(url).build()).execute();
+        if (response.code() == 401) {
+            getJson(url(0));
+        }
+        return response.body().string();
+    }
+
+    private String url(int page) {
+        String url = "";
+        int pg = page;
+        try {
+            if (this.pages.size() >= page) {
+                pg = this.pages.size() - 1;
+            }
+            url = "https://www.googleapis.com/youtube/v3/search?" + MyAcessTokenData + this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=snippet"
+                    //+ "&" + "pageToken=" + ((String) this.pages.get(pg)) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(this.f33q.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
+                    + "&" + "pageToken=" + "" + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode("cat", CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
+            return url;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return url;
+        }
+    }
+
+    public void resetPages() {
+        //this.myDataAll = new ArrayList();
+        //this.scroll = false;
+        this.pages = new ArrayList();
+        this.pages.add("");
+    }
 }
