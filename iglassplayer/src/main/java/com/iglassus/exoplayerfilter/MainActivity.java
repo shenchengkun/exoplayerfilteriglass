@@ -1,9 +1,7 @@
 package com.iglassus.exoplayerfilter;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,27 +9,28 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
@@ -42,6 +41,7 @@ import android.widget.Toast;
 
 import com.google.android.exoplayer2.Player;
 import com.google.android.gms.plus.PlusShare;
+import com.google.android.youtube.player.YouTubeApiServiceUtil;
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
@@ -53,7 +53,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
@@ -85,6 +84,8 @@ import at.huber.youtubeExtractor.YtFile;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH;
 
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
@@ -128,6 +129,11 @@ public class MainActivity extends Activity{
     private SharedPreferences pref;
     private RecyclerView mRecyclerView;
     private ListAdapter mAdapter;
+    private DefaultBandwidthMeter defaultBandwidthMeter;
+    private DataSource.Factory dataSourceFactory;
+    private ExtractorsFactory extractorsFactory;
+    private String[] SUGGESTION = new String[]{"Belgium", "France", "Italy", "Germany", "Spain"};
+    private AutoCompleteTextView autoCompleteTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +141,12 @@ public class MainActivity extends Activity{
         setContentView(R.layout.activity_main);
         UsbChangeNotification.appIsRunning=true;
 
-        //getURI("rUOgEfE9Cf4",false);
+        //palyYoutubeWithID("rUOgEfE9Cf4",false);
 
+
+        defaultBandwidthMeter = new DefaultBandwidthMeter();
+        dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
+        extractorsFactory = new DefaultExtractorsFactory();
         this.mRecyclerView = (RecyclerView) findViewById(R.id.mlist);
         this.mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pref= this.pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -148,6 +158,50 @@ public class MainActivity extends Activity{
         // https://developer.android.com/training/system-ui/immersive.html
         // Hide the status bar on Android 4.1 (API level 16) and higher:
         // https://bradmartin.net/2016/03/10/fullscreen-and-navigation-bar-color-in-a-nativescript-android-app/
+
+        autoCompleteTextView=findViewById(R.id.playtxt);
+        ArrayAdapter<String> adapter = new ArrayAdapter(this, R.layout.dropdown, this.SUGGESTION);
+        autoCompleteTextView.setAdapter(adapter);
+        autoCompleteTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                autoCompleteTextView.setEnabled(true);
+                autoCompleteTextView.setCursorVisible(true);
+                autoCompleteTextView.setBackgroundResource(R.drawable.picb46);
+            }
+        });
+        autoCompleteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId != EditorInfo.IME_ACTION_SEARCH) {
+                    return false;
+                }
+                newSearch();
+                autoCompleteTextView.dismissDropDown();
+                autoCompleteTextView.setCursorVisible(false);
+                InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                im.hideSoftInputFromWindow(getCurrentFocus().getApplicationWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                hideSystemUI();
+                return true;
+            }
+        });
+        autoCompleteTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() != 1 || event.getRawX() < ((float) (MainActivity.this.autoCompleteTextView.getRight() - MainActivity.this.autoCompleteTextView.getCompoundDrawables()[2].getBounds().width()))) {
+                    return false;
+                }
+                newSearch();
+                return true;
+            }
+        });
+        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                newSearch();
+            }
+        });
+
         unLock =findViewById(R.id.unLock);
         unLock.setVisibility(View.GONE);
         View decorView = getWindow().getDecorView();
@@ -217,23 +271,8 @@ public class MainActivity extends Activity{
 
                 TextView textViewChosenFileName = (TextView) findViewById(R.id.choosenfilename_textview);
                 textViewChosenFileName.setText("Chosen File: " + inputVideoFilePath);
-
-                // Measures bandwidth during playback. Can be null if not required.
-                DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
-                // Produces DataSource instances through which media data is loaded.
-                Context context = getApplicationContext();
-                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "yourApplicationName"), defaultBandwidthMeter);
-                // Produces Extractor instances for parsing the media data.
-                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-                // This is the MediaSource representing the media to be played.
-                // My Option to use File Chooser: inputVideoFilePath
-                // https://github.com/google/ExoPlayer/issues/3410: Uri localUri=Uri.fromFile(file);
-                MediaSource videoSource = new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null);
-                //videoSource = new ExtractorMediaSource(Uri.parse(testURL), dataSourceFactory, extractorsFactory, null, null);
-                // Prepare the player with the source.
-                player.prepare(videoSource);
+                player.prepare(new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null));
                 player.setPlayWhenReady(true);
-                ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
                 playPause.setText(R.string.pause);
             }
         });
@@ -296,7 +335,7 @@ public class MainActivity extends Activity{
         });
 
         resetPages();
-        new RunTask().execute(url(0),"0");
+        newSearch();
         Log.i("开始","activity开始了");
     }
 
@@ -413,6 +452,7 @@ public class MainActivity extends Activity{
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         ePlayerView.onResume();
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
         //movieWrapperView.addView(ePlayerView);
 
         // ScrollView is accessed from the inner class. need to be delcared final
@@ -598,54 +638,6 @@ public class MainActivity extends Activity{
         Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+"Frequency{"+String.valueOf(rate)+"}",Toast.LENGTH_LONG).show();
     }
 
-    void getURI(String id, boolean is360) {
-        if (!false) {
-            String youtubeLink = "http://youtube.com/watch?v=" + id;
-            final String str = id;
-            final boolean z = is360;
-            YouTubeUriExtractor ytEx = new YouTubeUriExtractor(this) {
-                public void onUrisAvailable(String videoId, String videoTitle, SparseArray<YtFile> ytFiles) {
-                    String downloadUrl = "";
-                    if (ytFiles != null) {
-                        ArrayList<Integer> key = new ArrayList();
-                        for (int i = 0; i < ytFiles.size(); i++) {
-                            key.add(Integer.valueOf(ytFiles.keyAt(i)));
-                            System.out.println(key.get(i));
-                        }
-                        if (key.contains(Integer.valueOf(MainActivity.itag))) {
-                            downloadUrl = ((YtFile) ytFiles.get(MainActivity.itag)).getUrl();
-                        } else if (key.contains(Integer.valueOf(18))) {
-                            downloadUrl = ((YtFile) ytFiles.get(18)).getUrl();
-                        } else if (key.contains(Integer.valueOf(22))) {
-                            downloadUrl = ((YtFile) ytFiles.get(22)).getUrl();
-                        } else if (key.contains(Integer.valueOf(36))) {
-                            downloadUrl = ((YtFile) ytFiles.get(36)).getUrl();
-                        } else if (key.contains(Integer.valueOf(17))) {
-                            downloadUrl = ((YtFile) ytFiles.get(17)).getUrl();
-                        } else {
-                        }
-                        System.out.println("Url------------>>> :" + downloadUrl);
-                        if (downloadUrl == null || downloadUrl.isEmpty()) {
-                            System.out.println("Download urL is null");
-                            return;
-                        } else if (z) {
-                            return;
-                        } else {
-                            //Intent intent = new Intent(SearchActivity.this, VideoPlayerActivity.class);
-                            //intent.putExtra(MainStarterActivity.vidId, downloadUrl);
-                            //SearchActivity.this.startActivity(intent);
-                            testURL=downloadUrl;
-                            Toast.makeText(getApplicationContext(),downloadUrl,Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                    }
-                    System.out.println("YTFILES is null");
-                }
-            };
-            ytEx.setIncludeWebM(false);
-            ytEx.execute(new String[]{youtubeLink});
-        }
-    }
 
     private class RunTask extends AsyncTask<String,String,List<data>>{
         List<data> myData;
@@ -730,14 +722,75 @@ public class MainActivity extends Activity{
 
         @Override
         protected void onPostExecute(List<data> data) {
-            Toast.makeText(getApplicationContext(),testJson,Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(),testJson,Toast.LENGTH_LONG).show();
             Log.i("json",testJson);
             mAdapter = new ListAdapter(data);
+            mAdapter.setOnItemClickListener(new ListAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(int position) {
+                    Toast.makeText(getApplicationContext(),"播放第"+(position+1)+"个视频",Toast.LENGTH_SHORT).show();
+                    palyYoutubeWithID(MainActivity.this.mAdapter.myData.get(position).getId(),false);
+                }
+                @Override
+                public void onLongClick(int position) {
+                    //Toast.makeText(getApplicationContext(),"您长按点击了"+position+"行",Toast.LENGTH_SHORT).show();
+                }
+            });
             mRecyclerView.setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
         }
     }
-    String getJson(String url) throws IOException {
+
+    private void newSearch(){
+        new RunTask().execute(url(0),"0");
+    }
+
+    private void palyYoutubeWithID(String id, boolean is360) {
+        if (!false) {
+            String youtubeLink = "http://youtube.com/watch?v=" + id;
+            final String str = id;
+            final boolean z = is360;
+            new YouTubeUriExtractor(this) {
+                public void onUrisAvailable(String videoId, String videoTitle, SparseArray<YtFile> ytFiles) {
+                    String downloadUrl = "";
+                    if (ytFiles != null) {
+                        ArrayList<Integer> key = new ArrayList();
+                        for (int i = 0; i < ytFiles.size(); i++) {
+                            key.add(Integer.valueOf(ytFiles.keyAt(i)));
+                            System.out.println(key.get(i));
+                        }
+                        if (key.contains(Integer.valueOf(MainActivity.itag))) {
+                            downloadUrl = ((YtFile) ytFiles.get(MainActivity.itag)).getUrl();
+                        } else if (key.contains(Integer.valueOf(18))) {
+                            downloadUrl = ((YtFile) ytFiles.get(18)).getUrl();
+                        } else if (key.contains(Integer.valueOf(22))) {
+                            downloadUrl = ((YtFile) ytFiles.get(22)).getUrl();
+                        } else if (key.contains(Integer.valueOf(36))) {
+                            downloadUrl = ((YtFile) ytFiles.get(36)).getUrl();
+                        } else if (key.contains(Integer.valueOf(17))) {
+                            downloadUrl = ((YtFile) ytFiles.get(17)).getUrl();
+                        } else {
+                        }
+                        System.out.println("Url------------>>> :" + downloadUrl);
+                        if (downloadUrl == null || downloadUrl.isEmpty()) {
+                            System.out.println("Download urL is null");
+                            return;
+                        } else if (z) {
+                            return;
+                        } else {
+                            player.prepare(new ExtractorMediaSource(Uri.parse(downloadUrl), dataSourceFactory, extractorsFactory, null, null));
+                            player.setPlayWhenReady(true);
+                            playPause.setText(R.string.pause);
+                            return;
+                        }
+                    }
+                    System.out.println("YTFILES is null");
+                }
+            }.execute(new String[]{youtubeLink});
+        }
+    }
+
+    private String getJson(String url) throws IOException {
 
         Response response = this.client.newCall(new Request.Builder().url(url).build()).execute();
         if (response.code() == 401) {
@@ -755,7 +808,7 @@ public class MainActivity extends Activity{
             }
             url = "https://www.googleapis.com/youtube/v3/search?" + MyAcessTokenData + this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=snippet"
                     //+ "&" + "pageToken=" + ((String) this.pages.get(pg)) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(this.f33q.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
-                    + "&" + "pageToken=" + this.pages.get(pg) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode("cat", CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
+                    + "&" + "pageToken=" + this.pages.get(pg) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(autoCompleteTextView.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
             return url;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

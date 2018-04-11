@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,7 +15,9 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class ListAdapter extends Adapter<ListAdapter.ListHolder> {
-    private List<data> myData;
+    public List<data> myData;
+    private AdapterView.OnItemClickListener mClickListener;
+    private OnItemClickListener mOnItemClickListener;
 
     public static class ListHolder extends ViewHolder implements OnClickListener {
         public static final String ListKey = "LIST";
@@ -40,7 +43,7 @@ public class ListAdapter extends Adapter<ListAdapter.ListHolder> {
             this.title.setText(myData.getTitle() + "");
             this.dates.setText(myData.getDate() + myData.getCount());
             //this.channel.setText(myData.getChannel() + "");
-            this.duration.setText(myData.getDuration());
+            this.duration.setText(myData.getDuration()+"•"+myData.getChannel());
         }
 
         public void onClick(View view) {
@@ -56,11 +59,34 @@ public class ListAdapter extends Adapter<ListAdapter.ListHolder> {
         return new ListHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_item, parent, false));
     }
 
-    public void onBindViewHolder(ListHolder holder, int position) {
+    public void onBindViewHolder(ListHolder holder, final int position) {
         holder.bind((data) this.myData.get(position));
+        if( mOnItemClickListener!= null){
+            holder.itemView.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnItemClickListener.onClick(position);
+                }
+            });
+            holder. itemView.setOnLongClickListener( new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mOnItemClickListener.onLongClick(position);
+                    return false;
+                }
+            });
+        }
     }
 
     public int getItemCount() {
         return this.myData.size();
+    }
+
+    public interface OnItemClickListener{
+        void onClick( int position);
+        void onLongClick( int position);
+    }
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener ){
+        this. mOnItemClickListener=onItemClickListener;
     }
 }
