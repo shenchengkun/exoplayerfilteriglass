@@ -1,38 +1,27 @@
 package com.iglassus.exoplayerfilter;
 
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.util.SparseArray;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-import java.util.ArrayList;
-
-import at.huber.youtubeExtractor.VideoMeta;
-import at.huber.youtubeExtractor.YouTubeExtractor;
-import at.huber.youtubeExtractor.YouTubeUriExtractor;
-import at.huber.youtubeExtractor.YtFile;
-
 /**
  * Created by AdminUser on 3/9/2018.
  */
 
-public class YoutubeActivity extends YouTubeBaseActivity{
+public class YoutubeActivity_deprecated extends YouTubeBaseActivity{
     private WebView mWebview;
     private YouTubePlayerView youTubePlayerView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_youtube);
+        setContentView(R.layout.activity_youtube_deprecated);
         mWebview=findViewById(R.id.webView);
         mWebview.getSettings().setJavaScriptEnabled(true); // enable javascript
         mWebview.setWebViewClient(new WebViewClient());

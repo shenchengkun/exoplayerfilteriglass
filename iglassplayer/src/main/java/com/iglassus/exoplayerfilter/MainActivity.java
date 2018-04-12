@@ -43,7 +43,6 @@ import android.widget.Toast;
 
 import com.google.android.exoplayer2.Player;
 import com.google.android.gms.plus.PlusShare;
-import com.google.android.youtube.player.YouTubeApiServiceUtil;
 import com.iglassus.epf.EPlayerView;
 import com.iglassus.epf.filter.VideoViewFilterParams;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
@@ -142,9 +141,6 @@ public class MainActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UsbChangeNotification.appIsRunning=true;
-
-        //palyYoutubeWithID("rUOgEfE9Cf4",false);
-
 
         defaultBandwidthMeter = new DefaultBandwidthMeter();
         dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
@@ -318,11 +314,6 @@ public class MainActivity extends Activity{
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
         });
-        setUpViews();
-        setUpSimpleExoPlayer();
-        setUoGlPlayerView();
-        setUpTimer();
-        castMovieToGlass();
 
         scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         youtubeSearchView=findViewById(R.id.youtubeSearchView);
@@ -336,16 +327,17 @@ public class MainActivity extends Activity{
             }
         });
 
+        setUpViews();
+        setUpSimpleExoPlayer();
+        setUoGlPlayerView();
+        setUpTimer();
+        castMovieToGlass();
         resetPages();
         newSearch();
         Log.i("开始","activity开始了");
     }
 
     // END: protected void onCreate(Bundle savedInstanceState)
-
-    public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
-        filePickerDialog.show();
-    }
     @Override
     protected void onNewIntent(Intent intent)
     {
@@ -356,6 +348,7 @@ public class MainActivity extends Activity{
             finishAndRemoveTask ();
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -367,6 +360,25 @@ public class MainActivity extends Activity{
         }
         if(glassService !=null) stopService(glassService);
         Log.i("破坏","activity被破坏了");
+    }
+
+    // https://android.googlesource.com/platform/development/+/e7a6ab4/samples/devbytes/ui/ImmersiveMode/src/main/java/com/example/android/immersive/ImmersiveActivity.java
+    // https://stackoverflow.com/questions/24187728/sticky-immersive-mode-disabled-after-soft-keyboard-shown
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // When the window loses focus (e.g. the action overflow is shown),
+        // cancel any pending hide action. When the window gains focus,
+        // hide the system UI.
+        if (hasFocus) {
+            delayedHide(300);
+        } else {
+            mHideHandler.removeMessages(0);
+        }
+    }
+
+    public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
+        filePickerDialog.show();
     }
 
     private void setUpViews() {
@@ -501,21 +513,6 @@ public class MainActivity extends Activity{
         player = null;
     }
 
-    // https://android.googlesource.com/platform/development/+/e7a6ab4/samples/devbytes/ui/ImmersiveMode/src/main/java/com/example/android/immersive/ImmersiveActivity.java
-    // https://stackoverflow.com/questions/24187728/sticky-immersive-mode-disabled-after-soft-keyboard-shown
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        // When the window loses focus (e.g. the action overflow is shown),
-        // cancel any pending hide action. When the window gains focus,
-        // hide the system UI.
-        if (hasFocus) {
-            delayedHide(300);
-        } else {
-            mHideHandler.removeMessages(0);
-        }
-    }
-
     private void hideSystemUI() {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -550,7 +547,7 @@ public class MainActivity extends Activity{
 
     public void openYoutube(View view) {
 
-        //Intent intent=new Intent(this,YoutubeActivity.class);
+        //Intent intent=new Intent(this,YoutubeActivity_deprecated.class);
         //startActivity(intent);
         youtubeSearchView.setVisibility(View.VISIBLE);
         youtubeSearchView.bringToFront();
@@ -640,7 +637,7 @@ public class MainActivity extends Activity{
         Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+"Frequency{"+String.valueOf(rate)+"}",Toast.LENGTH_LONG).show();
     }
 
-
+////////////////All below are for youtube playing////////////////////////
     private class RunTask extends AsyncTask<String,String,List<data>>{
         List<data> myData;
         boolean prescroll;
@@ -650,7 +647,6 @@ public class MainActivity extends Activity{
             this.myData = new ArrayList();
             this.prescroll = false;
         }
-
         @Override
         protected List<data> doInBackground(String... strings) {
             int i;
