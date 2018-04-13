@@ -64,6 +64,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.iglassus.exoplayerfilter.youtubeData.DeveloperKey;
+import com.iglassus.exoplayerfilter.youtubeData.EndlessRecyclerViewScrollListener;
 import com.iglassus.exoplayerfilter.youtubeData.ListAdapter;
 import com.iglassus.exoplayerfilter.youtubeData.data;
 import com.xw.repo.BubbleSeekBar;
@@ -86,8 +87,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH;
-
 public class MainActivity extends Activity{
     public final static int REQUEST_CODE = -1010101;
     public static int itag=22;
@@ -99,6 +98,7 @@ public class MainActivity extends Activity{
     private Button playPause, unLock;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
+    Spinner image2dor3dformat_spinner;
 
     // for file chooser
     DialogProperties properties = new DialogProperties();
@@ -135,6 +135,10 @@ public class MainActivity extends Activity{
     private ExtractorsFactory extractorsFactory;
     private String[] SUGGESTION = new String[]{"Belgium", "France", "Italy", "Germany", "Spain"};
     private AutoCompleteTextView autoCompleteTextView;
+    private LinearLayoutManager mLinearLayoutManager;
+    private boolean scroll;
+    private ArrayList myDataAll;
+    private String curString="3d SBS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +150,8 @@ public class MainActivity extends Activity{
         dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), defaultBandwidthMeter);
         extractorsFactory = new DefaultExtractorsFactory();
         this.mRecyclerView = (RecyclerView) findViewById(R.id.mlist);
-        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLinearLayoutManager = new LinearLayoutManager(this);
+        this.mRecyclerView.setLayoutManager(mLinearLayoutManager);
         pref= this.pref = PreferenceManager.getDefaultSharedPreferences(this);
         client=new OkHttpClient();
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat);
@@ -174,6 +179,7 @@ public class MainActivity extends Activity{
                 if (actionId != EditorInfo.IME_ACTION_SEARCH) {
                     return false;
                 }
+                curString=autoCompleteTextView.getText().toString();
                 newSearch();
                 autoCompleteTextView.dismissDropDown();
                 autoCompleteTextView.setCursorVisible(false);
@@ -212,7 +218,7 @@ public class MainActivity extends Activity{
         decorView.setSystemUiVisibility(uiOptions);
 
         // spinner to choose the frame size
-        Spinner image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
+        image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
         List<String> image2dor3dformaList = new ArrayList<String>();
         //image2dor3dformaList.add("1D format");
         image2dor3dformaList.add("2D format");
@@ -317,7 +323,7 @@ public class MainActivity extends Activity{
 
         scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         youtubeSearchView=findViewById(R.id.youtubeSearchView);
-        youtubeGone=findViewById(R.id.youtubeGone);
+        youtubeGone=findViewById(R.id.backToControl);
         youtubeGone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -389,6 +395,7 @@ public class MainActivity extends Activity{
             @Override
             public void onClick(View view) {
                 scrollview_controller.setVisibility(View.GONE);
+                youtubeSearchView.setVisibility(View.GONE);
             }
         });
 
@@ -561,6 +568,13 @@ public class MainActivity extends Activity{
         unLock.setVisibility(View.GONE);
     }
 
+    public void youtubeLock(View view){
+        //final Button btn_controlvisibility = (Button) findViewById(R.id.btn_controlvisibility);
+        //btn_controlvisibility.performClick();
+    }
+    public void youtubeModeSwitch(View view){
+    }
+
     //@RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("NewApi")
     public void checkDrawOverlayPermission() {
@@ -641,7 +655,6 @@ public class MainActivity extends Activity{
     private class RunTask extends AsyncTask<String,String,List<data>>{
         List<data> myData;
         boolean prescroll;
-        String testJson="";
 
         private RunTask() {
             this.myData = new ArrayList();
@@ -650,7 +663,7 @@ public class MainActivity extends Activity{
         @Override
         protected List<data> doInBackground(String... strings) {
             int i;
-            if (true||strings[1].equals("0")) {
+            if (strings[1].equals("0")) {
                 MainActivity.this.resetPages();
             }
             String getData = "";
@@ -660,7 +673,6 @@ public class MainActivity extends Activity{
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            testJson=getData;
             try {
                 JSONObject jSONObject = new JSONObject(getData);
                 if (jSONObject.isNull("nextPageToken")) {
@@ -719,10 +731,21 @@ public class MainActivity extends Activity{
         }
 
         @Override
-        protected void onPostExecute(List<data> data) {
+        protected void onPostExecute(List<data> myData) {
             //Toast.makeText(getApplicationContext(),testJson,Toast.LENGTH_LONG).show();
-            Log.i("json",testJson);
-            mAdapter = new ListAdapter(data);
+            myDataAll.addAll(myData);
+            if (this.prescroll && MainActivity.this.pages.size() > 1) {
+                MainActivity.this.scroll = true;
+            }
+            if (MainActivity.this.myDataAll.size() > 20) {
+                MainActivity.this.mAdapter.notifyDataSetChanged();
+            } else {
+                MainActivity.this.mAdapter = new ListAdapter(MainActivity.this.myDataAll);
+                MainActivity.this.mRecyclerView.setAdapter(MainActivity.this.mAdapter);
+                if (!MainActivity.this.myDataAll.isEmpty()) {
+                    MainActivity.this.mRecyclerView.setVisibility(View.VISIBLE);
+                }
+            }
             mAdapter.setOnItemClickListener(new ListAdapter.OnItemClickListener() {
                 @Override
                 public void onClick(int position) {
@@ -734,8 +757,6 @@ public class MainActivity extends Activity{
                     //Toast.makeText(getApplicationContext(),"您长按点击了"+position+"行",Toast.LENGTH_SHORT).show();
                 }
             });
-            mRecyclerView.setAdapter(mAdapter);
-            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -749,6 +770,14 @@ public class MainActivity extends Activity{
             return;
         }
         new RunTask().execute(url(0),"0");
+        mRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(mLinearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView recyclerView) {
+                if (MainActivity.this.scroll) {
+                    new RunTask().execute(new String[]{url(page), (page + 1) + ""});
+                }
+            }
+        });
     }
 
     private void palyYoutubeWithID(String id, boolean is360) {
@@ -823,7 +852,7 @@ public class MainActivity extends Activity{
             }
             url = "https://www.googleapis.com/youtube/v3/search?" + MyAcessTokenData + this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=snippet"
                     //+ "&" + "pageToken=" + ((String) this.pages.get(pg)) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(this.f33q.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
-                    + "&" + "pageToken=" + this.pages.get(pg) + "&" + "maxResults=30" + "&" + "q=" + URLEncoder.encode(autoCompleteTextView.getText().toString(), CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
+                    + "&" + "pageToken=" + this.pages.get(pg) + "&" + "maxResults=20" + "&" + "q=" + URLEncoder.encode(curString, CharEncoding.UTF_8) + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA";
             return url;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -832,8 +861,8 @@ public class MainActivity extends Activity{
     }
 
     public void resetPages() {
-        //this.myDataAll = new ArrayList();
-        //this.scroll = false;
+        this.myDataAll = new ArrayList();
+        this.scroll = false;
         this.pages = new ArrayList();
         this.pages.add("");
     }

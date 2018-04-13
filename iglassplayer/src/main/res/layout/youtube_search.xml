@@ -53,17 +53,33 @@
         android:layout_alignParentBottom="true">
 
         <Button
-            android:id="@+id/youtubeGone"
+            android:id="@+id/backToControl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="YoutubeGone"
+            android:text="Back"
             android:layout_weight="1"/>
 
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/sign_in_button"
+<!--
+        <Button
+            android:id="@+id/hideYoutube"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:text="LOCK"
+            android:layout_weight="1"
+            android:onClick="youtubeLock" />
+        <Button
+            android:id="@+id/switchMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2D/3D"
+            android:layout_weight="1"
+            android:onClick="youtubeModeSwitch"/>
+-->
+        <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"/>
     </LinearLayout>
 
 

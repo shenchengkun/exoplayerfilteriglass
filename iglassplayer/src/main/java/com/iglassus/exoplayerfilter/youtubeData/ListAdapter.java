@@ -43,7 +43,7 @@ public class ListAdapter extends Adapter<ListAdapter.ListHolder> {
             this.title.setText(myData.getTitle() + "");
             this.dates.setText(myData.getDate() + myData.getCount());
             //this.channel.setText(myData.getChannel() + "");
-            this.duration.setText(myData.getDuration()+"•"+myData.getChannel());
+            this.duration.setText(myData.getDuration()+" • "+myData.getChannel());
         }
 
         public void onClick(View view) {
