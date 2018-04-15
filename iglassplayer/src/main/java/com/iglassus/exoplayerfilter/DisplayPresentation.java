@@ -15,7 +15,6 @@ import android.widget.Toast;
  */
 
 public class DisplayPresentation extends Presentation {
-    ImageView imageView;
 
     public DisplayPresentation(Context outerContext, Display display) {
         super(outerContext, display);
@@ -27,10 +26,6 @@ public class DisplayPresentation extends Presentation {
         setContentView(R.layout.iglass_screen);
 
         MovieWrapperView movieWrapperView=findViewById(R.id.layout_movie_wrapper_iGlass);
-        movieWrapperView.addView(MainActivity.ePlayerView);
-        imageView=new ImageView(getContext());
-        imageView.setImageResource(R.drawable.cat);
-        //movieWrapperView.addView(imageView);
-
+        movieWrapperView.addView(IGLassMainActivity.ePlayerView);
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
@@ -11,15 +11,15 @@
         android:background="#ff0000"
         android:layout_marginTop="10dp">
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:id="@+id/homeIC"
             android:src="@drawable/start_icon"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="STRING"
-            android:textSize="40dp"
+            android:textSize="30dp"
             android:id="@+id/title"/>
     </LinearLayout>
 
@@ -27,8 +27,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="STRING"
-        android:textSize="30dp"
+        android:textSize="20dp"
         android:id="@+id/subtitle"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:background="#ff9c8a7a"/>
 
 </LinearLayout>

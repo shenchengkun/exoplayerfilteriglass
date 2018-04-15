@@ -1,61 +1,242 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#303f9f"
-        android:text="iGlass SBS Viewer"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:paddingLeft="10dp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="
-        what is your plan today ?"
-        android:drawableLeft="@drawable/iconvr"
-        android:paddingLeft="10dp"
-        android:textSize="20dp"/>
-    <GridView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:id="@+id/homeGV"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp">
-    </GridView>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/home_view">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#303f9f"
+            android:text="iGlass SBS Viewer"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:paddingLeft="10dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:text="
+
+        What is your choice ?"
+            android:drawableLeft="@drawable/iconvr"
+            android:drawableRight="@drawable/iconvr"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="15dp"
+            android:textColor="#000000"/>
+        <GridView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/homeGV"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:listSelector="@android:color/transparent">
+        </GridView>
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="5dp"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:background="#342536"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_play"
+                        android:layout_weight="1"
+                        android:id="@+id/play_pause"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_stretch"
+                        android:layout_weight="1"
+                        android:id="@+id/stretch"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_type_2d"
+                        android:layout_weight="1"
+                        android:id="@+id/mode"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_screen_lock_rotation"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="play"
+                        android:textColor="#D87545"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="stretch"
+                        android:textColor="#D87545"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2d"
+                        android:textColor="#D87545"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="lock"
+                        android:textColor="#D87545"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#B87653">
+
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/start_icon"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="iGlass USA Inc"
+                android:layout_centerInParent="true" />
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_menu_share_holo_light"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray">
+        android:layout_height="match_parent"
+        android:paddingTop="10dp"
+        android:visibility="gone"
+        android:id="@+id/youtube_search_view">
 
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/start_icon"
-            android:layout_alignParentLeft="true"
-            />
-
-        <TextView
+        <AutoCompleteTextView
+            android:theme="@style/Base.TextAppearance.AppCompat.SearchResult"
+            android:textColor="#000"
+            android:textColorHint="#34495e"
+            android:id="@+id/playtxt"
+            android:background="@drawable/picb46"
+            android:paddingLeft="17dp"
+            android:paddingTop="10dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="10dp"
+            android:clickable="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="iGlass USA Inc"
-            android:layout_centerInParent="true" />
+            android:layout_height="60dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:hint="Search"
+            android:textSize="40dp"
+            android:lines="1"
+            android:drawableRight="@drawable/search72"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
 
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_menu_share_holo_light"
-            android:layout_alignParentEnd="true"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/mlist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="2dp"
+            android:layout_marginBottom="60dp"
+            android:drawSelectorOnTop="true"
+            android:cacheColorHint="#00000000"
+            android:divider="#00000000"
+            android:dividerHeight="1dp"
+            android:layout_below="@+id/playtxt"
+            android:layout_alignParentLeft="true"
+            android:fastScrollAlwaysVisible="false"
+            android:layout_alignParentStart="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/backToControl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/switchMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2D/3D"
+                android:layout_weight="1"/>
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+
     </RelativeLayout>
 
-</LinearLayout>
+</FrameLayout>

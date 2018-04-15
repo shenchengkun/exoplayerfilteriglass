@@ -67,7 +67,6 @@ import com.iglassus.exoplayerfilter.youtubeData.DeveloperKey;
 import com.iglassus.exoplayerfilter.youtubeData.EndlessRecyclerViewScrollListener;
 import com.iglassus.exoplayerfilter.youtubeData.ListAdapter;
 import com.iglassus.exoplayerfilter.youtubeData.data;
-import com.xw.repo.BubbleSeekBar;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.json.JSONArray;
@@ -98,15 +97,15 @@ public class MainActivity extends Activity{
     private Button playPause, unLock;
     private SeekBar seekBar;
     private PlayerTimer playerTimer;
-    Spinner image2dor3dformat_spinner;
+    private Spinner image2dor3dformat_spinner;
 
     // for file chooser
-    DialogProperties properties = new DialogProperties();
-    FilePickerDialog filePickerDialog;
-    VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format2D;
+    private DialogProperties properties = new DialogProperties();
+    private FilePickerDialog filePickerDialog;
+    private VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format2D;
 
     // for videoFileReformatter
-    String inputVideoFilePath;
+    private String inputVideoFilePath;
 
     // padding of the frame image relative to the video player view window
     private float bsk_upperpadding_percentage = 0.0f;
@@ -387,8 +386,8 @@ public class MainActivity extends Activity{
     }
 
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
-        //filePickerDialog.show();
-        startActivity(new Intent(this,IGLassMainActivity.class));
+        filePickerDialog.show();
+        //startActivity(new Intent(this,IGLassMainActivity.class));
     }
 
     private void setUpViews() {

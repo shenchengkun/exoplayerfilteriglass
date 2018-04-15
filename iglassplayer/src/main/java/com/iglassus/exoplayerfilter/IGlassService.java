@@ -31,43 +31,6 @@ public class IGlassService extends Service {
 
             mPresentation.show();
         }
-    /*
-    TextView mView;
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Toast.makeText(getBaseContext(), "onCreate", Toast.LENGTH_LONG).show();
-        mView = new TextView(this);
-        mView.setText("haha");
-        mView.bringToFront();
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                0,
-//              WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-//                      | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.RIGHT | Gravity.TOP;
-        params.setTitle("Load Average");
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        wm.addView(mView, params);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Toast.makeText(getBaseContext(), "onDestroy", Toast.LENGTH_LONG).show();
-        if (mView != null) {
-            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(mView);
-            mView = null;
-        }
-    }*/
 
     @Override
     public void onDestroy() {

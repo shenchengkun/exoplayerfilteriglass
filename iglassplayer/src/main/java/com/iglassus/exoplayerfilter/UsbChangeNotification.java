@@ -28,7 +28,7 @@ public class UsbChangeNotification extends BroadcastReceiver {
                 //Toast.makeText(context, "USB 设备拔出或关闭", Toast.LENGTH_SHORT).show();
             }
         }
-
+/*
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -38,5 +38,6 @@ public class UsbChangeNotification extends BroadcastReceiver {
                 context.startActivity(intentStartGlass);
             }
         }, delay);
+        */
     }
 }
