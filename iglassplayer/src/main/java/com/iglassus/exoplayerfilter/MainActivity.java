@@ -138,7 +138,8 @@ public class MainActivity extends Activity{
     private LinearLayoutManager mLinearLayoutManager;
     private boolean scroll;
     private ArrayList myDataAll;
-    private String curString="3d SBS";
+    private String curString="victoria's secret";
+    private boolean is3d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,7 +217,7 @@ public class MainActivity extends Activity{
                  | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
-
+/*
         // spinner to choose the frame size
         image2dor3dformat_spinner = (Spinner) findViewById(R.id.image2dor3dformat_spinner);
         List<String> image2dor3dformaList = new ArrayList<String>();
@@ -247,7 +248,7 @@ public class MainActivity extends Activity{
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-
+*/
         // file chooser
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
         properties.selection_type = DialogConfigs.FILE_SELECT;
@@ -273,14 +274,16 @@ public class MainActivity extends Activity{
                 // properties.root = new File(selectedDirPath);
                 properties.offset = new File(selectedDirPath);
 
-                TextView textViewChosenFileName = (TextView) findViewById(R.id.choosenfilename_textview);
-                textViewChosenFileName.setText("Chosen File: " + inputVideoFilePath);
+                //TextView textViewChosenFileName = (TextView) findViewById(R.id.choosenfilename_textview);
+                //textViewChosenFileName.setText("Chosen File: " + inputVideoFilePath);
+                MainActivity.this.findViewById(R.id.mode_2d).performClick();
+                MainActivity.this.findViewById(R.id.modeFS).performClick();
                 player.prepare(new ExtractorMediaSource(Uri.fromFile(new File(inputVideoFilePath)), dataSourceFactory, extractorsFactory, null, null));
                 player.setPlayWhenReady(true);
                 playPause.setText(R.string.pause);
             }
         });
-
+/*
         // set the padding bubble seek bars listener
         final BubbleSeekBar bsk_upperpadding = findViewById(R.id.upperpadding_bsk);
         final BubbleSeekBar bsk_bottompadding = findViewById(R.id.bottompadding_bsk);
@@ -320,7 +323,7 @@ public class MainActivity extends Activity{
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
         });
-
+*/
         scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         youtubeSearchView=findViewById(R.id.youtubeSearchView);
         youtubeGone=findViewById(R.id.backToControl);
@@ -384,7 +387,8 @@ public class MainActivity extends Activity{
     }
 
     public void chooseVideoFileToProcess(@SuppressWarnings("unused") View unused) {
-        filePickerDialog.show();
+        //filePickerDialog.show();
+        startActivity(new Intent(this,IGLassMainActivity.class));
     }
 
     private void setUpViews() {
@@ -573,6 +577,8 @@ public class MainActivity extends Activity{
         //btn_controlvisibility.performClick();
     }
     public void youtubeModeSwitch(View view){
+        if(frameImgFormatEnum== VideoViewFilterParams.FrameImgFormatEnum.Format2D) this.findViewById(R.id.mode_3d).performClick();
+        else this.findViewById(R.id.mode_2d).performClick();
     }
 
     //@RequiresApi(api = Build.VERSION_CODES.M)
@@ -651,7 +657,33 @@ public class MainActivity extends Activity{
         Toast.makeText(getApplicationContext(),String.valueOf(metrics)+"\n"+"Frequency{"+String.valueOf(rate)+"}",Toast.LENGTH_LONG).show();
     }
 
-////////////////All below are for youtube playing////////////////////////
+    public void mode2D(View view) {
+        frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format2D;
+        videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+
+    }
+
+    public void modeFS(View view) {
+        videoViewFilterParams.setUpperPadding_percentage(0.0f);
+        videoViewFilterParams.setBottomPadding_percentage(0.0f);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
+
+    public void mode3D(View view) {
+        frameImgFormatEnum = VideoViewFilterParams.FrameImgFormatEnum.Format3D;
+        videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
+
+    public void mode169(View view) {
+        videoViewFilterParams.setUpperPadding_percentage(0.09f);
+        videoViewFilterParams.setBottomPadding_percentage(0.09f);
+        ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+    }
+
+
+    ////////////////All below are for youtube playing////////////////////////
     private class RunTask extends AsyncTask<String,String,List<data>>{
         List<data> myData;
         boolean prescroll;
@@ -822,6 +854,8 @@ public class MainActivity extends Activity{
                         } else if (z) {
                             return;
                         } else {
+                            MainActivity.this.findViewById(R.id.mode_2d).performClick();
+                            MainActivity.this.findViewById(R.id.modeFS).performClick();
                             player.prepare(new ExtractorMediaSource(Uri.parse(downloadUrl), dataSourceFactory, extractorsFactory, null, null));
                             player.setPlayWhenReady(true);
                             playPause.setText(R.string.pause);

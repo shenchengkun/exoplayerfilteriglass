@@ -36,6 +36,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".IGLassMainActivity" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:screenOrientation="portrait"/>
         <activity android:name=".YoutubeActivity_deprecated" android:configChanges="keyboardHidden|orientation|screenSize" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
         <service android:enabled="true"  android:name=".IGlassService"/>
 

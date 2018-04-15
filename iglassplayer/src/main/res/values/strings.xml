@@ -2,6 +2,6 @@
     <string name="app_name">iGlassPlayer</string>
     <string name="play">play</string>
     <string name="pause">pause</string>
-    <string name="controlvisibility">Lock</string>
+    <string name="controlvisibility">Lock Screen</string>
     <string name="search_youtube">YouTube Search</string>
 </resources>
