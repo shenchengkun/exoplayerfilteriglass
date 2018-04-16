@@ -162,20 +162,16 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="10dp"
-        android:visibility="gone"
-        android:id="@+id/youtube_search_view">
+        android:id="@+id/youtube_search_view"
+        android:layout_marginTop="15dp"
+        android:visibility="gone">
 
         <AutoCompleteTextView
             android:theme="@style/Base.TextAppearance.AppCompat.SearchResult"
             android:textColor="#000"
             android:textColorHint="#34495e"
             android:id="@+id/playtxt"
-            android:background="@drawable/picb46"
-            android:paddingLeft="17dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="10dp"
+            android:background="#987654"
             android:clickable="true"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
@@ -198,7 +194,9 @@
             android:id="@+id/mlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginRight="2dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="60dp"
             android:drawSelectorOnTop="true"
             android:cacheColorHint="#00000000"
@@ -213,7 +211,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_alignParentBottom="true">
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="5dp">
 
             <Button
                 android:id="@+id/backToControl"

@@ -132,6 +132,22 @@ public class IGLassMainActivity  extends Activity{
         newSearch();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+        if(glassService !=null) stopService(glassService);
+    }
+
+    private void releasePlayer() {
+        ePlayerView.onPause();
+        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
+        ePlayerView = null;
+        player.stop();
+        player.release();
+        player = null;
+    }
+
     private void setUpYoutubeView() {
         this.mRecyclerView = findViewById(R.id.mlist);
         mLinearLayoutManager = new LinearLayoutManager(this);
@@ -146,7 +162,7 @@ public class IGLassMainActivity  extends Activity{
             public void onClick(View v) {
                 autoCompleteTextView.setEnabled(true);
                 autoCompleteTextView.setCursorVisible(true);
-                autoCompleteTextView.setBackgroundResource(R.drawable.picb46);
+                //autoCompleteTextView.setBackgroundResource(R.drawable.picb46);
             }
         });
         autoCompleteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -192,21 +208,7 @@ public class IGLassMainActivity  extends Activity{
         resetPages();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        releasePlayer();
-        if(glassService !=null) stopService(glassService);
-    }
 
-    private void releasePlayer() {
-        ePlayerView.onPause();
-        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
-        ePlayerView = null;
-        player.stop();
-        player.release();
-        player = null;
-    }
 
     private void setUpControlPanel() {
         playPause=findViewById(R.id.play_pause);
