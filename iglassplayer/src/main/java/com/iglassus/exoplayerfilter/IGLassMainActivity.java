@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -14,6 +16,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -39,14 +42,20 @@ import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -79,8 +88,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class IGLassMainActivity  extends Activity{
-    private float bsk_upperpadding_percentage = 0.0f;
-    private float bsk_bottompadding_percentage = 0.0f;
+    private float bsk_upperpadding_percentage = 0.09f;
+    private float bsk_bottompadding_percentage = 0.09f;
     private float bsk_leftrightpadding_percentage = 0.0f;
     private float bsk_middlepadding_percentage = 0.0f;
     private boolean flip=true;
@@ -99,7 +108,8 @@ public class IGLassMainActivity  extends Activity{
     private FilePickerDialog filePickerDialog;
 
     private ImageView playPause,stretch,mode;
-    private boolean isPlaying=false,is169=false;
+    private boolean isPlaying=false,is169=true;
+    private TextView movieDuration;
 
     public Intent glassService;
     public final static int REQUEST_CODE = -1010101;
@@ -152,8 +162,11 @@ public class IGLassMainActivity  extends Activity{
         this.mRecyclerView = findViewById(R.id.mlist);
         mLinearLayoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(mLinearLayoutManager);
+
         pref = PreferenceManager.getDefaultSharedPreferences(this);
+
         client=new OkHttpClient();
+
         autoCompleteTextView=findViewById(R.id.playtxt);
         ArrayAdapter<String> adapter = new ArrayAdapter(this, R.layout.dropdown, this.SUGGESTION);
         autoCompleteTextView.setAdapter(adapter);
@@ -196,8 +209,12 @@ public class IGLassMainActivity  extends Activity{
                 newSearch();
             }
         });
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.search72);
+        drawable.setBounds(0, 0, 100,100);
+        autoCompleteTextView.setCompoundDrawables(null, null, drawable, null);
+        autoCompleteTextView.setPadding(10,0,10,0);
 
-        findViewById(R.id.backToControl).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.back_to_control).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -205,6 +222,14 @@ public class IGLassMainActivity  extends Activity{
                 findViewById(R.id.youtube_search_view).setVisibility(View.GONE);
             }
         });
+
+        findViewById(R.id.youtube_mode).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mode.performClick();
+            }
+        });
+
         resetPages();
     }
 
@@ -214,12 +239,14 @@ public class IGLassMainActivity  extends Activity{
         playPause=findViewById(R.id.play_pause);
         stretch=findViewById(R.id.stretch);
         mode=findViewById(R.id.mode);
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        movieDuration=findViewById(R.id.movie_duration);
 
         playPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isPlaying = isPlaying ? false : true;
+                playPause.setBackgroundColor(isPlaying? Color.YELLOW:Color.TRANSPARENT);
                 player.setPlayWhenReady(isPlaying);
             }
         });
@@ -236,6 +263,8 @@ public class IGLassMainActivity  extends Activity{
                     bsk_bottompadding_percentage = 0.09f;
                     is169=true;
                 }
+
+                stretch.setBackgroundColor(is169? Color.TRANSPARENT:Color.YELLOW);
                 videoViewFilterParams.setUpperPadding_percentage(bsk_upperpadding_percentage);
                 videoViewFilterParams.setBottomPadding_percentage(bsk_bottompadding_percentage);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
@@ -246,6 +275,7 @@ public class IGLassMainActivity  extends Activity{
             public void onClick(View v) {
                 frameImgFormatEnum= (frameImgFormatEnum==VideoViewFilterParams.FrameImgFormatEnum.Format2D)?
                         VideoViewFilterParams.FrameImgFormatEnum.Format3D:VideoViewFilterParams.FrameImgFormatEnum.Format2D;
+                mode.setBackgroundColor(frameImgFormatEnum== VideoViewFilterParams.FrameImgFormatEnum.Format3D?Color.TRANSPARENT:Color.YELLOW);
                 videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
             }
@@ -282,17 +312,20 @@ public class IGLassMainActivity  extends Activity{
             public void onTick(long timeMillis) {
                 long position = player.getCurrentPosition();
                 long duration = player.getDuration();
+                int positionInt=(int)position/1000;
+                int durationInt=(int)duration/1000;
                 if (duration <= 0) return;
 
-                seekBar.setMax((int) duration / 1000);
-                seekBar.setProgress((int) position / 1000);
+                movieDuration.setText(positionInt/60+":"+positionInt%60+"("+durationInt/60+":"+durationInt%60+")");
+                seekBar.setMax(durationInt);
+                seekBar.setProgress(positionInt);
             }
         });
         playerTimer.start();
     }
 
     private void setUpHomeItermViews() {
-        GridView gridView=findViewById(R.id.homeGV);
+        GridView gridView=findViewById(R.id.home_GV);
         gridView.setAdapter(new HomeItemAdapter(this,new String[]{"VIDEO","PHOTO","YOUTUBE"},new String[]{"Play local videos","Photo slide show","Watch youtube videos"},
                 new int[]{R.drawable.mb_video,R.drawable.mb_photo,R.drawable.mb_web}));
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -335,10 +368,16 @@ public class IGLassMainActivity  extends Activity{
                 String selectedDirPath = (new File(selectedFilePath)).getParent().toString();
                 properties.offset = new File(selectedDirPath);
                 player.prepare(new ExtractorMediaSource(Uri.fromFile(new File(selectedFilePath)), dataSourceFactory, extractorsFactory, null, null));
-                player.setPlayWhenReady(true);
+                playNewMovie();
             }
         });
         filePickerDialog.show();
+    }
+
+    private void playNewMovie() {
+        player.setPlayWhenReady(true);
+        isPlaying=true;
+        playPause.setBackgroundColor(Color.YELLOW);
     }
 
     private void setUpSimpleExoPlayer() {
@@ -349,7 +388,60 @@ public class IGLassMainActivity  extends Activity{
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
         player.setRepeatMode(Player.REPEAT_MODE_ONE);
+        player.addListener(new Player.EventListener() {
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+            }
+
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if(playbackState==Player.STATE_BUFFERING) DisplayPresentation.showLoadingView();
+                else DisplayPresentation.hideLoadingView();
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+
+            }
+
+            @Override
+            public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+
+            }
+
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+
+            }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+            }
+
+            @Override
+            public void onSeekProcessed() {
+
+            }
+        });
     }
+
     private void setUoGlPlayerView() {
         ePlayerView = new EPlayerView(this.getApplicationContext());
         ePlayerView.setSimpleExoPlayer(player);
@@ -489,7 +581,11 @@ public class IGLassMainActivity  extends Activity{
                 @Override
                 public void onClick(int position) {
                     Toast.makeText(getApplicationContext(),"播放第"+(position+1)+"个视频",Toast.LENGTH_SHORT).show();
+                    playPause.setBackgroundColor(Color.YELLOW);
+                    isPlaying=true;
                     palyYoutubeWithID(IGLassMainActivity.this.mAdapter.myData.get(position).getId(),false);
+                    player.setPlayWhenReady(false);
+                    DisplayPresentation.showLoadingView();
                 }
                 @Override
                 public void onLongClick(int position) {
@@ -562,7 +658,7 @@ public class IGLassMainActivity  extends Activity{
                             return;
                         } else {
                             player.prepare(new ExtractorMediaSource(Uri.parse(downloadUrl), dataSourceFactory, extractorsFactory, null, null));
-                            player.setPlayWhenReady(true);
+                            playNewMovie();
                             return;
                         }
                     }

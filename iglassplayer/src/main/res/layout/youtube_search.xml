@@ -55,7 +55,7 @@
         android:layout_alignParentBottom="true">
 
         <Button
-            android:id="@+id/backToControl"
+            android:id="@+id/back_to_control"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Back"

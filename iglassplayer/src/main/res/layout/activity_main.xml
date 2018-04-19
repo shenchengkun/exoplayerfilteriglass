@@ -43,7 +43,7 @@
                 android:text="@string/controlvisibility"
                 android:layout_gravity="end"/>
             <SeekBar
-                android:id="@+id/seekBar"
+                android:id="@+id/seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"

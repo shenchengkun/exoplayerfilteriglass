@@ -325,7 +325,7 @@ public class MainActivity extends Activity{
 */
         scrollview_controller = (ScrollView) findViewById(R.id.scrollview_controller);
         youtubeSearchView=findViewById(R.id.youtubeSearchView);
-        youtubeGone=findViewById(R.id.backToControl);
+        youtubeGone=findViewById(R.id.back_to_control);
         youtubeGone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -420,7 +420,7 @@ public class MainActivity extends Activity{
         });
 
         // seek
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar = (SeekBar) findViewById(R.id.seek_bar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
