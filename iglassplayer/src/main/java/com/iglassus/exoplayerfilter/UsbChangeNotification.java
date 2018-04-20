@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
+
 
 /**
  * Created by AdminUser on 3/22/2018.
@@ -12,32 +14,33 @@ import android.widget.Toast;
 
 public class UsbChangeNotification extends BroadcastReceiver {
     public static boolean appIsRunning=false;
+    private static String HDMIINTENT = "android.intent.action.HDMI_PLUGGED";
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
-        // TODO Auto-generated method stub
-        int delay=0;
+    public void onReceive(final Context ctxt, Intent receivedIt) {
+        String action = receivedIt.getAction();
 
-        if (intent.getAction().equals("android.hardware.usb.action.USB_STATE")) {
-            boolean connected = intent.getExtras().getBoolean("connected");
-            //Toast.makeText(context, "USB 变化", Toast.LENGTH_LONG).show();
-            if (connected) {
-                //Toast.makeText(context, "USB 设备连接", Toast.LENGTH_SHORT).show();
-                //delay=2000;
-            }else {
-                //Toast.makeText(context, "USB 设备拔出或关闭", Toast.LENGTH_SHORT).show();
+        if (action.equals(HDMIINTENT)) {
+            boolean state = receivedIt.getBooleanExtra("state", false);
+
+            if (state == true) {
+                Log.d("HDMIListner", "BroadcastReceiver.onReceive() : Connected HDMI-TV");
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Do something after 100ms
+                        ctxt.startActivity(new Intent(ctxt,IGLassMainActivity.class));
+                    }
+                }, 100);
+                //Toast.makeText(ctxt, "HDMI >>", Toast.LENGTH_LONG).show();
+            } else {
+                Log.d("HDMIListner", "HDMI >>: Disconnected HDMI-TV");
+                //Toast.makeText(ctxt, "HDMI DisConnected>>", Toast.LENGTH_LONG).show();
+                if(IGLassMainActivity.app!=null) IGLassMainActivity.app.finishAndRemoveTask();
             }
+
         }
-/*
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                Intent intentStartGlass = new Intent(context, MainActivity.class);
-                context.startActivity(intentStartGlass);
-            }
-        }, delay);
-        */
     }
+
 }

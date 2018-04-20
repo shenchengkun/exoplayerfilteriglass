@@ -31,6 +31,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -43,7 +44,6 @@ import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -87,7 +87,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class IGLassMainActivity  extends Activity{
+public class IGLassMainActivity extends Activity{
     private float bsk_upperpadding_percentage = 0.09f;
     private float bsk_bottompadding_percentage = 0.09f;
     private float bsk_leftrightpadding_percentage = 0.0f;
@@ -107,12 +107,16 @@ public class IGLassMainActivity  extends Activity{
     private DialogProperties properties = new DialogProperties();
     private FilePickerDialog filePickerDialog;
 
-    private ImageView playPause,stretch,mode;
+    private ImageView playPause,stretch,mode,lock;
     private boolean isPlaying=false,is169=true;
     private TextView movieDuration;
+    private ViewGroup touchEventView;
+    private Button unlock;
 
     public Intent glassService;
     public final static int REQUEST_CODE = -1010101;
+    private boolean noHDMI=false;
+    public static Activity app;
 
     private ArrayList<String> pages;
     private String[] SUGGESTION = new String[]{"Belgium", "France", "Italy", "Germany", "Spain"};
@@ -122,6 +126,7 @@ public class IGLassMainActivity  extends Activity{
     private ArrayList myDataAll;
     private String curString="victoria's secret"; private OkHttpClient client;
     static String MyAcessTokenData = "access_token=";
+    public static int itag=22;
     private SharedPreferences pref;
     private RecyclerView mRecyclerView;
     private ListAdapter mAdapter;
@@ -132,6 +137,11 @@ public class IGLassMainActivity  extends Activity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.iglass_layout_main);
+        if(noHDMI()) {
+            finishAndRemoveTask();
+            noHDMI=true;
+            return;
+        }
 
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
@@ -145,23 +155,40 @@ public class IGLassMainActivity  extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(noHDMI) return;
+
         releasePlayer();
         if(glassService !=null) stopService(glassService);
     }
 
+
+    private boolean noHDMI() {
+        DisplayManager mDisplayManager = (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
+        Display[] displays = mDisplayManager.getDisplays();
+        if (displays.length <= 1) {
+            Toast.makeText(this, "No Glass Found", Toast.LENGTH_SHORT).show();
+            Log.i("未检测到", "未检测到眼镜");
+            return true;
+        } else {
+            Toast.makeText(this, "Glass Found", Toast.LENGTH_SHORT).show();
+            Log.i("检测到", "检测到眼镜");
+            return false;
+        }
+    }
+
     private void releasePlayer() {
         ePlayerView.onPause();
-        ((MovieWrapperView) findViewById(R.id.layout_movie_wrapper)).removeAllViews();
         ePlayerView = null;
         player.stop();
         player.release();
         player = null;
+        playerTimer.stop();
     }
 
     private void setUpYoutubeView() {
-        this.mRecyclerView = findViewById(R.id.mlist);
+        mRecyclerView = findViewById(R.id.mlist);
         mLinearLayoutManager = new LinearLayoutManager(this);
-        this.mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
 
         pref = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -196,7 +223,8 @@ public class IGLassMainActivity  extends Activity{
         autoCompleteTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() != 1 || event.getRawX() < ((float) (IGLassMainActivity.this.autoCompleteTextView.getRight() - IGLassMainActivity.this.autoCompleteTextView.getCompoundDrawables()[2].getBounds().width()))) {
+                if (event.getAction() != 1 || event.getRawX() < ((float) (IGLassMainActivity.this.autoCompleteTextView.getRight() -
+                        IGLassMainActivity.this.autoCompleteTextView.getCompoundDrawables()[2].getBounds().width()))) {
                     return false;
                 }
                 newSearch();
@@ -234,13 +262,15 @@ public class IGLassMainActivity  extends Activity{
     }
 
 
-
     private void setUpControlPanel() {
         playPause=findViewById(R.id.play_pause);
         stretch=findViewById(R.id.stretch);
         mode=findViewById(R.id.mode);
-        seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        seekBar = findViewById(R.id.seek_bar);
         movieDuration=findViewById(R.id.movie_duration);
+        lock=findViewById(R.id.lock);
+        touchEventView =findViewById(R.id.touch_event_view);
+        unlock=findViewById(R.id.unlock);
 
         playPause.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -278,6 +308,14 @@ public class IGLassMainActivity  extends Activity{
                 mode.setBackgroundColor(frameImgFormatEnum== VideoViewFilterParams.FrameImgFormatEnum.Format3D?Color.TRANSPARENT:Color.YELLOW);
                 videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
+            }
+        });
+        lock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findViewById(R.id.home_view).setVisibility(View.GONE);
+                unlock.setVisibility(View.GONE);
+                touchEventView.setVisibility(View.VISIBLE);
             }
         });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -322,6 +360,21 @@ public class IGLassMainActivity  extends Activity{
             }
         });
         playerTimer.start();
+
+        unlock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findViewById(R.id.home_view).setVisibility(View.VISIBLE);
+                touchEventView.setVisibility(View.GONE);
+            }
+        });
+
+        touchEventView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                unlock.setVisibility(unlock.getVisibility()==View.GONE?View.VISIBLE:View.GONE);
+            }
+        });
     }
 
     private void setUpHomeItermViews() {
@@ -346,18 +399,21 @@ public class IGLassMainActivity  extends Activity{
     }
 
     private void openPhoto() {
-
+        openFile(1);
     }
 
     private void openVideo() {
+        openFile(0);
+    }
+    private void openFile(final int tag) {
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
         properties.selection_type = DialogConfigs.FILE_SELECT;
-        properties.root = new File(DialogConfigs.DEFAULT_DIR);
-        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
-        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
+        properties.root = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
+        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
+        properties.offset = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
         properties.extensions = null;
         filePickerDialog = new FilePickerDialog(this,properties);
-        filePickerDialog.setTitle("Select a Video File");
+        filePickerDialog.setTitle(tag==0?"Select a Video File":"Select a Picture File");
         filePickerDialog.setDialogSelectionListener(new DialogSelectionListener() {
             @Override
             public void onSelectedFilePaths(String[] files) {
@@ -367,14 +423,22 @@ public class IGLassMainActivity  extends Activity{
                 String selectedFilePath = files[0];
                 String selectedDirPath = (new File(selectedFilePath)).getParent().toString();
                 properties.offset = new File(selectedDirPath);
-                player.prepare(new ExtractorMediaSource(Uri.fromFile(new File(selectedFilePath)), dataSourceFactory, extractorsFactory, null, null));
-                playNewMovie();
+                if(tag==0) {
+                    player.prepare(new ExtractorMediaSource(Uri.fromFile(new File(selectedFilePath)), dataSourceFactory, extractorsFactory, null, null));
+                    playNewMovie();
+                }else {
+                    player.prepare(null);
+                    DisplayPresentation.hideMovieView();
+                    DisplayPresentation.showPicView(selectedFilePath);
+                }
             }
         });
         filePickerDialog.show();
     }
 
     private void playNewMovie() {
+        DisplayPresentation.hidePicView();
+        DisplayPresentation.showMovieView();
         player.setPlayWhenReady(true);
         isPlaying=true;
         playPause.setBackgroundColor(Color.YELLOW);
@@ -451,17 +515,9 @@ public class IGLassMainActivity  extends Activity{
     }
 
     private void castMovieToGlass() {
-        DisplayManager mDisplayManager = (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
-        Display[] displays = mDisplayManager.getDisplays();
-        if (displays.length <= 1) {
-            Toast.makeText(this, "未检测到眼镜", Toast.LENGTH_LONG).show();
-            Log.i("未检测到", "未检测到眼镜");
-            //finishAndRemoveTask();
-        } else {
-            Toast.makeText(this, "检测到眼镜", Toast.LENGTH_SHORT).show();
-            Log.i("检测到", "检测到眼镜");
-            checkDrawOverlayPermission();
-        }
+
+        app=this;
+        checkDrawOverlayPermission();
     }
 
     //@RequiresApi(api = Build.VERSION_CODES.M)
@@ -481,6 +537,7 @@ public class IGLassMainActivity  extends Activity{
         glassService = new Intent(this, IGlassService.class);
         startService(glassService);
     }
+
 
 
     ////////////////All below are for youtube playing////////////////////////
@@ -542,7 +599,9 @@ public class IGLassMainActivity  extends Activity{
             } catch (NullPointerException e4) {
             }
             try {
-                JSONArray items = new JSONObject(IGLassMainActivity.this.getJson("https://www.googleapis.com/youtube/v3/videos?" + MainActivity.MyAcessTokenData + IGLassMainActivity.this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=contentDetails,statistics" + "&" + "id=" + idDuration + "&" + "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA")).getJSONArray("items");
+                JSONArray items = new JSONObject(IGLassMainActivity.this.getJson("https://www.googleapis.com/youtube/v3/videos?" + IGLassMainActivity.MyAcessTokenData +
+                        IGLassMainActivity.this.pref.getString(DeveloperKey.AcessToken, "none") + "&" + "part=contentDetails,statistics" + "&" + "id=" + idDuration + "&" +
+                        "key=AIzaSyA6Sp0Jo0PdZmY0VYXwDSGsTk16yHcjEYA")).getJSONArray("items");
                 int kk = 0;
                 for (i = 0; i < this.myData.size(); i++) {
                     if (((data) this.myData.get(i)).getType() == 0) {
@@ -638,8 +697,8 @@ public class IGLassMainActivity  extends Activity{
                             key.add(Integer.valueOf(ytFiles.keyAt(i)));
                             System.out.println(key.get(i));
                         }
-                        if (key.contains(Integer.valueOf(MainActivity.itag))) {
-                            downloadUrl = ((YtFile) ytFiles.get(MainActivity.itag)).getUrl();
+                        if (key.contains(Integer.valueOf(IGLassMainActivity.itag))) {
+                            downloadUrl = ((YtFile) ytFiles.get(IGLassMainActivity.itag)).getUrl();
                         } else if (key.contains(Integer.valueOf(18))) {
                             downloadUrl = ((YtFile) ytFiles.get(18)).getUrl();
                         } else if (key.contains(Integer.valueOf(22))) {
