@@ -155,17 +155,18 @@ public class IGLassMainActivity extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        app=null;
-        if(noHDMI) return;
-
+        app = null;
+        if (noHDMI) return;
         releasePlayer();
-        if(glassService !=null) stopService(glassService);
+        if (glassService != null) stopService(glassService);
+
     }
 
     @Override
     public void onBackPressed() {
 
     }
+
 
     private boolean noHDMI() {
         DisplayManager mDisplayManager = (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);

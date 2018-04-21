@@ -15,7 +15,6 @@ import android.widget.Toast;
  */
 
 public class UsbChangeNotification extends BroadcastReceiver {
-    public static boolean appIsRunning=false;
     private static String HDMIINTENT = "android.intent.action.HDMI_PLUGGED";
 
     @Override
@@ -52,7 +51,9 @@ public class UsbChangeNotification extends BroadcastReceiver {
                 //   usb 拔出
                 //Toast.makeText(ctxt, "拔出", Toast.LENGTH_LONG).show();
             }
-            if(IGLassMainActivity.app!=null) IGLassMainActivity.app.finishAndRemoveTask();
+            if(IGLassMainActivity.app!=null) {
+                IGLassMainActivity.app.finishAndRemoveTask();
+            }
             else {
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -66,8 +67,7 @@ public class UsbChangeNotification extends BroadcastReceiver {
                             ctxt.startActivity(new Intent(ctxt,IGLassMainActivity.class));
                         }
                     }
-                }, 400);
-
+                }, 2500);
             }
         }
     }
