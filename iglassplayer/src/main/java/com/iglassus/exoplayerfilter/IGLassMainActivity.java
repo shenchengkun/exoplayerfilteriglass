@@ -116,7 +116,7 @@ public class IGLassMainActivity extends Activity{
     public Intent glassService;
     public final static int REQUEST_CODE = -1010101;
     private boolean noHDMI=false;
-    public static Activity app;
+    public static Activity app=null;
 
     private ArrayList<String> pages;
     private String[] SUGGESTION = new String[]{"Belgium", "France", "Italy", "Germany", "Spain"};
@@ -155,12 +155,17 @@ public class IGLassMainActivity extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        app=null;
         if(noHDMI) return;
 
         releasePlayer();
         if(glassService !=null) stopService(glassService);
     }
 
+    @Override
+    public void onBackPressed() {
+
+    }
 
     private boolean noHDMI() {
         DisplayManager mDisplayManager = (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);

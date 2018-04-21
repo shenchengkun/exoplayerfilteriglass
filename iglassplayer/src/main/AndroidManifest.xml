@@ -40,6 +40,7 @@
         <receiver android:name=".UsbChangeNotification">
             <intent-filter>
                 <action android:name="android.intent.action.HDMI_PLUGGED" />
+                <action android:name="android.hardware.usb.action.USB_STATE"/>
             </intent-filter>
         </receiver>
 

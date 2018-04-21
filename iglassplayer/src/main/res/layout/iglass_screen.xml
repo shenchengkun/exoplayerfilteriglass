@@ -38,7 +38,8 @@
                 android:layout_below="@id/loadingIcon"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/loadingText"
-                android:textSize="30dp"/>
+                android:textSize="30dp"
+                android:scaleX="-1"/>
 
         </RelativeLayout>
         <RelativeLayout
@@ -62,7 +63,8 @@
                 android:layout_below="@id/loadingIcon1"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/loadingText1"
-                android:textSize="30dp"/>
+                android:textSize="30dp"
+                android:scaleX="-1"/>
 
         </RelativeLayout>
 
