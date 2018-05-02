@@ -8,11 +8,13 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -22,10 +24,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -88,8 +93,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class IGLassMainActivity extends Activity{
-    private float bsk_upperpadding_percentage = 0.09f;
-    private float bsk_bottompadding_percentage = 0.09f;
+    private float bsk_upperpadding_percentage = 0.0f;
+    private float bsk_bottompadding_percentage = 0.0f;
     private float bsk_leftrightpadding_percentage = 0.0f;
     private float bsk_middlepadding_percentage = 0.0f;
     private boolean flip=true;
@@ -108,10 +113,28 @@ public class IGLassMainActivity extends Activity{
     private FilePickerDialog filePickerDialog;
 
     private ImageView playPause,stretch,mode,lock;
-    private boolean isPlaying=false,is169=true;
+    private boolean isPlaying=false,is169=false;
     private TextView movieDuration;
+    private SeekBar seekBar;
+    private PlayerTimer playerTimer;
+
     private ViewGroup touchEventView;
     private Button unlock;
+    private GestureDetector gestureDetector;
+    private boolean firstScroll = false;// 每次触摸屏幕后，第一次scroll的标志
+    private int GESTURE_FLAG = 0;// 1,调节进度，2，调节音量,3.调节亮度
+    private static final int GESTURE_MODIFY_PROGRESS = 1;
+    private static final int GESTURE_MODIFY_VOLUME = 2;
+    private static final int GESTURE_MODIFY_BRIGHT = 3;
+    private int playerWidth;
+    private int playerHeight;
+    private AudioManager audiomanager;
+    private int maxVolume;
+    private int currentVolume;
+    private float mBrightness = -1f; // 亮度
+    private static final float STEP_PROGRESS = 2f;// 设定进度滑动时的步长，避免每次滑动都改变，导致改变过快
+    private static final float STEP_VOLUME = 2f;// 协调音量滑动时的步长，避免每次滑动都改变，导致改变过快
+    private int playingTime=0, videoTotalTime;
 
     public Intent glassService;
     public final static int REQUEST_CODE = -1010101;
@@ -124,14 +147,13 @@ public class IGLassMainActivity extends Activity{
     private LinearLayoutManager mLinearLayoutManager;
     private boolean scroll;
     private ArrayList myDataAll;
-    private String curString="victoria's secret"; private OkHttpClient client;
+    private String curString="victoria's secret";
+    private OkHttpClient client;
     static String MyAcessTokenData = "access_token=";
     public static int itag=22;
     private SharedPreferences pref;
     private RecyclerView mRecyclerView;
     private ListAdapter mAdapter;
-    private SeekBar seekBar;
-    private PlayerTimer playerTimer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -142,7 +164,6 @@ public class IGLassMainActivity extends Activity{
             noHDMI=true;
             return;
         }
-
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpControlPanel();
@@ -166,7 +187,6 @@ public class IGLassMainActivity extends Activity{
     public void onBackPressed() {
 
     }
-
 
     private boolean noHDMI() {
         DisplayManager mDisplayManager = (DisplayManager) this.getSystemService(Context.DISPLAY_SERVICE);
@@ -367,6 +387,20 @@ public class IGLassMainActivity extends Activity{
         });
         playerTimer.start();
 
+        touchEventView.setLongClickable(true);
+        audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        maxVolume = audiomanager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
+        currentVolume = audiomanager.getStreamVolume(AudioManager.STREAM_MUSIC); // 获取当前值
+        /** 获取视频播放窗口的尺寸 */
+        ViewTreeObserver viewObserver = touchEventView.getViewTreeObserver();
+        viewObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                touchEventView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                playerWidth = touchEventView.getWidth();
+                playerHeight = touchEventView.getHeight();
+            }
+        });
         unlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -374,11 +408,128 @@ public class IGLassMainActivity extends Activity{
                 touchEventView.setVisibility(View.GONE);
             }
         });
-
-        touchEventView.setOnClickListener(new View.OnClickListener() {
+        gestureDetector=new GestureDetector(this, new GestureDetector.OnGestureListener() {
             @Override
-            public void onClick(View v) {
-                unlock.setVisibility(unlock.getVisibility()==View.GONE?View.VISIBLE:View.GONE);
+            public boolean onDown(MotionEvent e) {
+                firstScroll = true;// 设定是触摸屏幕后第一次scroll的标志
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                unlock.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        unlock.setVisibility(View.GONE);
+                    }
+                },3000);
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                float mOldX = e1.getX(), mOldY = e1.getY();
+                int y = (int) e2.getRawY();
+                if (firstScroll) {// 以触摸屏幕后第一次滑动为标准，避免在屏幕上操作切换混乱
+                    // 横向的距离变化大则调整进度，纵向的变化大则调整音量
+                    if (Math.abs(distanceX) >= Math.abs(distanceY)) {
+                        GESTURE_FLAG = GESTURE_MODIFY_PROGRESS;
+                    } else {
+                        if (mOldX > playerWidth * 3.0 / 5) {// 音量
+                            GESTURE_FLAG = GESTURE_MODIFY_VOLUME;
+                        } else if (mOldX < playerWidth * 2.0 / 5) {// 亮度
+                            GESTURE_FLAG = GESTURE_MODIFY_BRIGHT;
+                        }
+                    }
+                }
+                // 如果每次触摸屏幕后第一次scroll是调节进度，那之后的scroll事件都处理音量进度，直到离开屏幕执行下一次操作
+                if (GESTURE_FLAG == GESTURE_MODIFY_PROGRESS) {
+                    // distanceX=lastScrollPositionX-currentScrollPositionX，因此为正时是快进
+                    if (Math.abs(distanceX) > Math.abs(distanceY)) {// 横向移动大于纵向移动
+                        if (distanceX >= DensityUtil.dip2px(getApplicationContext(), STEP_PROGRESS)) {// 快退，用步长控制改变速度，可微调
+                            //if (playingTime > 3) {// 避免为负
+                            //    playingTime -= 3;// scroll方法执行一次快退3秒
+                            //} else {
+                            //    playingTime = 0;
+                            //}
+                            playingTime=-5000;
+                        } else if (distanceX <= -DensityUtil.dip2px(getApplicationContext(), STEP_PROGRESS)) {// 快进
+                            //if (playingTime < videoTotalTime - 16) {// 避免超过总时长
+                            //    playingTime += 3;// scroll执行一次快进3秒
+                            //} else {
+                            //    playingTime = videoTotalTime - 10;
+                            //}
+                            playingTime=5000;
+                        }
+                    }
+                }
+                // 如果每次触摸屏幕后第一次scroll是调节音量，那之后的scroll事件都处理音量调节，直到离开屏幕执行下一次操作
+                else if (GESTURE_FLAG == GESTURE_MODIFY_VOLUME) {
+                    currentVolume = audiomanager.getStreamVolume(AudioManager.STREAM_MUSIC); // 获取当前值
+                    if (Math.abs(distanceY) > Math.abs(distanceX)) {// 纵向移动大于横向移动
+                        if (distanceY >= 5.0*DensityUtil.dip2px(getApplicationContext(), STEP_VOLUME)) {// 音量调大,注意横屏时的坐标体系,尽管左上角是原点，但横向向上滑动时distanceY为正
+                            if (currentVolume < maxVolume) {// 为避免调节过快，distanceY应大于一个设定值
+                                currentVolume++;
+                            }
+                        } else if (distanceY <= -5.0*DensityUtil.dip2px(getApplicationContext(), STEP_VOLUME)) {// 音量调小
+                            if (currentVolume > 0) {
+                                currentVolume--;
+                                if (currentVolume == 0) {// 静音，设定静音独有的图片
+                                }
+                            }
+                        }
+                        int percentage = (currentVolume * 100) / maxVolume;
+                        audiomanager.setStreamVolume(AudioManager.STREAM_MUSIC,currentVolume, 0);
+                    }
+                }
+                // 如果每次触摸屏幕后第一次scroll是调节亮度，那之后的scroll事件都处理亮度调节，直到离开屏幕执行下一次操作
+                else if (GESTURE_FLAG == GESTURE_MODIFY_BRIGHT) {
+                    if (mBrightness < 0) {
+                        mBrightness = getWindow().getAttributes().screenBrightness;
+                        if (mBrightness <= 0.00f)
+                            mBrightness = 0.50f;
+                        if (mBrightness < 0.01f)
+                            mBrightness = 0.01f;
+                    }
+                    WindowManager.LayoutParams lpa = getWindow().getAttributes();
+                    lpa.screenBrightness = mBrightness + (mOldY - y) / playerHeight;
+                    if (lpa.screenBrightness > 1.0f)
+                        lpa.screenBrightness = 1.0f;
+                    else if (lpa.screenBrightness < 0.01f)
+                        lpa.screenBrightness = 0.01f;
+                    getWindow().setAttributes(lpa);
+                }
+
+                firstScroll = false;// 第一次scroll执行完成，修改标志
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return false;
+            }
+        });
+        gestureDetector.setIsLongpressEnabled(true);
+        touchEventView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    GESTURE_FLAG = 0;// 手指离开屏幕后，重置调节音量或进度的标志
+                    player.seekTo(player.getCurrentPosition()+playingTime);
+                    playingTime=0;
+                }
+                return gestureDetector.onTouchEvent(event);
             }
         });
     }
@@ -445,6 +596,14 @@ public class IGLassMainActivity extends Activity{
     private void playNewMovie() {
         DisplayPresentation.hidePicView();
         DisplayPresentation.showMovieView();
+
+        if(is169){
+            stretch.performClick();
+        }
+        if(frameImgFormatEnum==VideoViewFilterParams.FrameImgFormatEnum.Format3D){
+            mode.performClick();
+        }
+
         player.setPlayWhenReady(true);
         isPlaying=true;
         playPause.setBackgroundColor(Color.YELLOW);
@@ -730,6 +889,16 @@ public class IGLassMainActivity extends Activity{
                     System.out.println("YTFILES is null");
                 }
             }.execute(new String[]{youtubeLink});
+            /*
+            new YouTubeExtractor(this) {
+                @Override
+                public void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta vMeta) {
+                    if (ytFiles != null) {
+                        int itag = 22;
+                        String downloadUrl = ytFiles.get(itag).getUrl();
+                    }
+                }
+            }.extract(youtubeLink, true, true);*/
         }
     }
 

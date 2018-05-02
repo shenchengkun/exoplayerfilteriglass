@@ -37,6 +37,7 @@ dependencies {
 
     //compile 'com.github.evgenyneu:js-evaluator-for-android:v4.0.0'
     compile 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
+    compile 'com.github.ed-george:AndroidVimeoExtractor:1.1.2'
 
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'

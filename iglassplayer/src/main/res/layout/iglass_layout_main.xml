@@ -102,7 +102,8 @@
                         android:layout_height="match_parent"
                         android:src="@drawable/ic_stretch"
                         android:layout_weight="1"
-                        android:id="@+id/stretch"/>
+                        android:id="@+id/stretch"
+                        android:background="#FFFFFF00"/>
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
