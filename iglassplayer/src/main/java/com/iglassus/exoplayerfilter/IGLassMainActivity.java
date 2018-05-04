@@ -104,6 +104,7 @@ public class IGLassMainActivity extends Activity{
     private VideoViewFilterParams videoViewFilterParams=new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,
             bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,null);
 
+    private GridView gridView;
     private SimpleExoPlayer player;
     public static EPlayerView ePlayerView;
 
@@ -134,7 +135,7 @@ public class IGLassMainActivity extends Activity{
     private float mBrightness = -1f; // 亮度
     private static final float STEP_PROGRESS = 2f;// 设定进度滑动时的步长，避免每次滑动都改变，导致改变过快
     private static final float STEP_VOLUME = 2f;// 协调音量滑动时的步长，避免每次滑动都改变，导致改变过快
-    private int playingTime=0, videoTotalTime;
+    private int playingTime=0;
 
     public Intent glassService;
     public final static int REQUEST_CODE = -1010101;
@@ -164,9 +165,11 @@ public class IGLassMainActivity extends Activity{
             noHDMI=true;
             return;
         }
+
         setUpSimpleExoPlayer();
         setUoGlPlayerView();
         setUpControlPanel();
+        setUpLockScreen();
         setUpHomeItermViews();
         castMovieToGlass();
         setUpYoutubeView();
@@ -294,9 +297,6 @@ public class IGLassMainActivity extends Activity{
         mode=findViewById(R.id.mode);
         seekBar = findViewById(R.id.seek_bar);
         movieDuration=findViewById(R.id.movie_duration);
-        lock=findViewById(R.id.lock);
-        touchEventView =findViewById(R.id.touch_event_view);
-        unlock=findViewById(R.id.unlock);
 
         playPause.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -334,14 +334,6 @@ public class IGLassMainActivity extends Activity{
                 mode.setBackgroundColor(frameImgFormatEnum== VideoViewFilterParams.FrameImgFormatEnum.Format3D?Color.TRANSPARENT:Color.YELLOW);
                 videoViewFilterParams.setFrameImgFormat(frameImgFormatEnum);
                 ePlayerView.setGlFilter(FilterType.createGlFilter(filterType, videoViewFilterParams, getApplicationContext()));
-            }
-        });
-        lock.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                findViewById(R.id.home_view).setVisibility(View.GONE);
-                unlock.setVisibility(View.GONE);
-                touchEventView.setVisibility(View.VISIBLE);
             }
         });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -386,12 +378,27 @@ public class IGLassMainActivity extends Activity{
             }
         });
         playerTimer.start();
+    }
+
+
+    private void setUpLockScreen() {
+        lock=findViewById(R.id.lock);
+        touchEventView =findViewById(R.id.touch_event_view);
+        unlock=findViewById(R.id.unlock);
 
         touchEventView.setLongClickable(true);
         audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         maxVolume = audiomanager.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 获取系统最大音量
         currentVolume = audiomanager.getStreamVolume(AudioManager.STREAM_MUSIC); // 获取当前值
         /** 获取视频播放窗口的尺寸 */
+        lock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findViewById(R.id.home_view).setVisibility(View.GONE);
+                unlock.setVisibility(View.GONE);
+                touchEventView.setVisibility(View.VISIBLE);
+            }
+        });
         ViewTreeObserver viewObserver = touchEventView.getViewTreeObserver();
         viewObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -422,13 +429,16 @@ public class IGLassMainActivity extends Activity{
 
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                unlock.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        unlock.setVisibility(View.GONE);
-                    }
-                },3000);
+                playPause.performClick();
+                if(unlock.getVisibility()==View.GONE) {
+                    unlock.setVisibility(View.VISIBLE);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            unlock.setVisibility(View.GONE);
+                        }
+                    }, 3000);
+                }
                 return false;
             }
 
@@ -451,7 +461,7 @@ public class IGLassMainActivity extends Activity{
                 // 如果每次触摸屏幕后第一次scroll是调节进度，那之后的scroll事件都处理音量进度，直到离开屏幕执行下一次操作
                 if (GESTURE_FLAG == GESTURE_MODIFY_PROGRESS) {
                     // distanceX=lastScrollPositionX-currentScrollPositionX，因此为正时是快进
-                    if (Math.abs(distanceX) > Math.abs(distanceY)) {// 横向移动大于纵向移动
+                    if (Math.abs(distanceX) > 2.0f*Math.abs(distanceY)) {// 横向移动大于纵向移动
                         if (distanceX >= DensityUtil.dip2px(getApplicationContext(), STEP_PROGRESS)) {// 快退，用步长控制改变速度，可微调
                             //if (playingTime > 3) {// 避免为负
                             //    playingTime -= 3;// scroll方法执行一次快退3秒
@@ -473,18 +483,19 @@ public class IGLassMainActivity extends Activity{
                 else if (GESTURE_FLAG == GESTURE_MODIFY_VOLUME) {
                     currentVolume = audiomanager.getStreamVolume(AudioManager.STREAM_MUSIC); // 获取当前值
                     if (Math.abs(distanceY) > Math.abs(distanceX)) {// 纵向移动大于横向移动
+                        //if (distanceY >0) {// 音量调大,注意横屏时的坐标体系,尽管左上角是原点，但横向向上滑动时distanceY为正
                         if (distanceY >= 5.0*DensityUtil.dip2px(getApplicationContext(), STEP_VOLUME)) {// 音量调大,注意横屏时的坐标体系,尽管左上角是原点，但横向向上滑动时distanceY为正
-                            if (currentVolume < maxVolume) {// 为避免调节过快，distanceY应大于一个设定值
+                            if (currentVolume < ((int)(0.6f*maxVolume))) {// 为避免调节过快，distanceY应大于一个设定值
                                 currentVolume++;
                             }
                         } else if (distanceY <= -5.0*DensityUtil.dip2px(getApplicationContext(), STEP_VOLUME)) {// 音量调小
-                            if (currentVolume > 0) {
+                        //} else {// 音量调小
+                            if (currentVolume > ((int)(0.1f*maxVolume))) {
                                 currentVolume--;
                                 if (currentVolume == 0) {// 静音，设定静音独有的图片
                                 }
                             }
                         }
-                        int percentage = (currentVolume * 100) / maxVolume;
                         audiomanager.setStreamVolume(AudioManager.STREAM_MUSIC,currentVolume, 0);
                     }
                 }
@@ -524,10 +535,13 @@ public class IGLassMainActivity extends Activity{
         touchEventView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
                 if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if(GESTURE_FLAG==GESTURE_MODIFY_PROGRESS) {
+                        player.seekTo(player.getCurrentPosition() + playingTime);
+                        playingTime = 0;
+                    }
                     GESTURE_FLAG = 0;// 手指离开屏幕后，重置调节音量或进度的标志
-                    player.seekTo(player.getCurrentPosition()+playingTime);
-                    playingTime=0;
                 }
                 return gestureDetector.onTouchEvent(event);
             }
@@ -535,7 +549,7 @@ public class IGLassMainActivity extends Activity{
     }
 
     private void setUpHomeItermViews() {
-        GridView gridView=findViewById(R.id.home_GV);
+        gridView=findViewById(R.id.home_GV);
         gridView.setAdapter(new HomeItemAdapter(this,new String[]{"VIDEO","PHOTO","YOUTUBE"},new String[]{"Play local videos","Photo slide show","Watch youtube videos"},
                 new int[]{R.drawable.mb_video,R.drawable.mb_photo,R.drawable.mb_web}));
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -548,6 +562,13 @@ public class IGLassMainActivity extends Activity{
                 }
             }
         });
+        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+        properties.selection_type = DialogConfigs.FILE_SELECT;
+        properties.root = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
+        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
+        properties.offset = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
+        properties.extensions = null;
+        filePickerDialog = new FilePickerDialog(this,properties);
     }
 
     private void openYoutube() {
@@ -563,13 +584,6 @@ public class IGLassMainActivity extends Activity{
         openFile(0);
     }
     private void openFile(final int tag) {
-        properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        properties.selection_type = DialogConfigs.FILE_SELECT;
-        properties.root = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
-        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
-        properties.offset = new File(DialogConfigs.DEFAULT_DIR+"/sdcard");
-        properties.extensions = null;
-        filePickerDialog = new FilePickerDialog(this,properties);
         filePickerDialog.setTitle(tag==0?"Select a Video File":"Select a Picture File");
         filePickerDialog.setDialogSelectionListener(new DialogSelectionListener() {
             @Override
@@ -610,7 +624,6 @@ public class IGLassMainActivity extends Activity{
     }
 
     private void setUpSimpleExoPlayer() {
-
         dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), new DefaultBandwidthMeter());
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
@@ -680,7 +693,6 @@ public class IGLassMainActivity extends Activity{
     }
 
     private void castMovieToGlass() {
-
         app=this;
         checkDrawOverlayPermission();
     }
@@ -702,8 +714,6 @@ public class IGLassMainActivity extends Activity{
         glassService = new Intent(this, IGlassService.class);
         startService(glassService);
     }
-
-
 
     ////////////////All below are for youtube playing////////////////////////
     private class RunTask extends AsyncTask<String,String,List<data>> {
