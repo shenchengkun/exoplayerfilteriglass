@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
  */
 
 public class VideoViewFilterParams {
-    public final Bitmap bitmap;
+    public final FilterGrid filterGrid;
 
     public enum FrameImgFormatEnum {
         Format3D,
@@ -22,7 +22,8 @@ public class VideoViewFilterParams {
     public float leftHalfImgLeftPadding_percentage;
     public float leftHalfImgRightPadding_percentage;
 
-    public VideoViewFilterParams(boolean flip, boolean distortion, FrameImgFormatEnum frameImgFormat, float upperPadding_percentage, float bottomPadding_percentage, float leftHalfImgLeftPadding_percentage, float leftHalfImgRightPadding_percentage, Bitmap bitmap) {
+    public VideoViewFilterParams(boolean flip, boolean distortion, FrameImgFormatEnum frameImgFormat, float upperPadding_percentage, float bottomPadding_percentage,
+                                 float leftHalfImgLeftPadding_percentage, float leftHalfImgRightPadding_percentage, FilterGrid filterGrid) {
         this.flip = flip;
         this.distortion = distortion;
         this.upperPadding_percentage = upperPadding_percentage;
@@ -30,7 +31,7 @@ public class VideoViewFilterParams {
         this.leftHalfImgLeftPadding_percentage = leftHalfImgLeftPadding_percentage;
         this.leftHalfImgRightPadding_percentage = leftHalfImgRightPadding_percentage;
         this.frameImgFormat=frameImgFormat;
-        this.bitmap=bitmap;
+        this.filterGrid=filterGrid;
     }
 
     public boolean isFlip() {
@@ -87,5 +88,9 @@ public class VideoViewFilterParams {
 
     public void setLeftHalfImgRightPadding_percentage(float leftHalfImgRightPadding_percentage) {
         this.leftHalfImgRightPadding_percentage = leftHalfImgRightPadding_percentage;
+    }
+
+    public FilterGrid getFilterGrid() {
+        return filterGrid;
     }
 }

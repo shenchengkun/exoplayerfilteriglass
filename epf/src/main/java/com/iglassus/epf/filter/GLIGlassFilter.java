@@ -7,6 +7,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  * Created by AsusUser on 2/4/2018.
@@ -21,6 +25,16 @@ public class GLIGlassFilter extends GlFilter {
     private float distortion;
     private float dup;
 
+    public static FilterGrid filterGrid;
+    public static int[] indiceData;
+    public static IntBuffer indiceBuffer;
+    public static FloatBuffer vertexBuffer;
+    public  static   float[] vertexData;
+    public  static   float[] vertexDataRight;
+    public static FloatBuffer vertexBufferRight;
+    public  static   float[] textureVertexData;
+    public static FloatBuffer textureVertexBuffer;
+
     public GLIGlassFilter(Context context, VideoViewFilterParams videoViewFilterParams) {
         AssetManager assetManager = context.getAssets();
         String fragStr = null;
@@ -32,6 +46,32 @@ public class GLIGlassFilter extends GlFilter {
         bottomPadding_percentage = videoViewFilterParams.bottomPadding_percentage;
         leftHalfImgLeftPadding_percentage = videoViewFilterParams.leftHalfImgLeftPadding_percentage;
         leftHalfImgRightPadding_percentage = videoViewFilterParams.leftHalfImgRightPadding_percentage;
+/**/
+        filterGrid=videoViewFilterParams.getFilterGrid();
+        vertexData=filterGrid.getVertices();
+        vertexDataRight=filterGrid.getVerticesRight();
+        textureVertexData=filterGrid.getTexels();
+        indiceData=filterGrid.getIndices();
+        vertexBuffer = ByteBuffer.allocateDirect(vertexData.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(vertexData);
+        vertexBuffer.position(0);
+        vertexBufferRight = ByteBuffer.allocateDirect(vertexDataRight.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(vertexDataRight);
+        vertexBufferRight.position(0);
+        textureVertexBuffer = ByteBuffer.allocateDirect(textureVertexData.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(textureVertexData);
+        textureVertexBuffer.position(0);
+        indiceBuffer=ByteBuffer.allocateDirect(indiceData.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asIntBuffer()
+                .put(indiceData);
+        indiceBuffer.position(0);
         try {
             InputStream fileInputStream = assetManager.open(filePath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
@@ -59,8 +99,8 @@ public class GLIGlassFilter extends GlFilter {
          GLES20.glUniform1f(getHandle("leftHalfImgLeftPadding_percentage"), leftHalfImgLeftPadding_percentage);
          GLES20.glUniform1f(getHandle("leftHalfImgRightPadding_percentage"), leftHalfImgRightPadding_percentage);
          GLES20.glUniform1f(getHandle("flip"), flip);
-         GLES20.glUniform1f(getHandle("distortion"), distortion);
-         GLES20.glUniform1f(getHandle("dup"), dup);
+         //GLES20.glUniform1f(getHandle("distortion"), distortion);
+         //GLES20.glUniform1f(getHandle("dup"), dup);
 
     }
 }

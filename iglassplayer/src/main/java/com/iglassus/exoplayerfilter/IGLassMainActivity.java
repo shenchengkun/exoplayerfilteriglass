@@ -68,6 +68,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.plus.PlusShare;
 import com.iglassus.epf.EPlayerView;
+import com.iglassus.epf.filter.FilterGrid;
 import com.iglassus.epf.filter.VideoViewFilterParams;
 import com.iglassus.exoplayerfilter.youtubeData.DeveloperKey;
 import com.iglassus.exoplayerfilter.youtubeData.EndlessRecyclerViewScrollListener;
@@ -81,6 +82,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -88,11 +90,15 @@ import java.util.List;
 
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 import at.huber.youtubeExtractor.YtFile;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class IGLassMainActivity extends Activity{
+    private FilterGrid filterGrid;
+    private Workbook workbook;
     private float bsk_upperpadding_percentage = 0.0f;
     private float bsk_bottompadding_percentage = 0.0f;
     private float bsk_leftrightpadding_percentage = 0.0f;
@@ -101,8 +107,7 @@ public class IGLassMainActivity extends Activity{
     private boolean distortion=false;
     final static FilterType filterType = FilterType.IGLASS;
     private VideoViewFilterParams.FrameImgFormatEnum frameImgFormatEnum= VideoViewFilterParams.FrameImgFormatEnum.Format2D;
-    private VideoViewFilterParams videoViewFilterParams=new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,
-            bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,null);
+    private VideoViewFilterParams videoViewFilterParams;
 
     private GridView gridView;
     private SimpleExoPlayer player;
@@ -429,7 +434,7 @@ public class IGLassMainActivity extends Activity{
 
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                playPause.performClick();
+                //playPause.performClick();
                 if(unlock.getVisibility()==View.GONE) {
                     unlock.setVisibility(View.VISIBLE);
                     new Handler().postDelayed(new Runnable() {
@@ -685,6 +690,19 @@ public class IGLassMainActivity extends Activity{
     }
 
     private void setUoGlPlayerView() {
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.distortion_data);
+            workbook = Workbook.getWorkbook(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BiffException e) {
+            e.printStackTrace();
+        }
+        Grid grid=new Grid(13,13,workbook);
+        filterGrid=new FilterGrid(grid.getHeight(),grid.getWidth(),grid.getVertices(),grid.getTexels(),grid.getVerticesRight(),grid.getIndices());
+        Log.i("啊啊啊啊啊啊啊啊啊啊",String.valueOf(filterGrid.getIndices()[11]));
+        videoViewFilterParams=new VideoViewFilterParams(flip,distortion,frameImgFormatEnum,bsk_upperpadding_percentage,
+                bsk_bottompadding_percentage,bsk_leftrightpadding_percentage,bsk_middlepadding_percentage,filterGrid);
         ePlayerView = new EPlayerView(this.getApplicationContext());
         ePlayerView.setSimpleExoPlayer(player);
         ePlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

@@ -8,12 +8,15 @@ import java.util.HashMap;
 import com.iglassus.epf.EglUtil;
 import com.iglassus.epf.EFramebufferObject;
 
-import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
 import static android.opengl.GLES20.GL_VERTEX_SHADER;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUseProgram;
+import static com.iglassus.epf.filter.GLIGlassFilter.indiceBuffer;
+import static com.iglassus.epf.filter.GLIGlassFilter.textureVertexBuffer;
+import static com.iglassus.epf.filter.GLIGlassFilter.vertexBuffer;
+import static com.iglassus.epf.filter.GLIGlassFilter.vertexBufferRight;
 
 /**
  * Created by sudamasayuki on 2017/05/16.
@@ -125,24 +128,29 @@ public class GlFilter {
     public void draw(final int texName, final EFramebufferObject fbo) {
         useProgram();
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferName);
+        //GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferName);
         GLES20.glEnableVertexAttribArray(getHandle("aPosition"));
-        GLES20.glVertexAttribPointer(getHandle("aPosition"), VERTICES_DATA_POS_SIZE, GL_FLOAT, false, VERTICES_DATA_STRIDE_BYTES, VERTICES_DATA_POS_OFFSET);
+        //GLES20.glVertexAttribPointer(getHandle("aPosition"), VERTICES_DATA_POS_SIZE, GL_FLOAT, false, VERTICES_DATA_STRIDE_BYTES, VERTICES_DATA_POS_OFFSET);
         GLES20.glEnableVertexAttribArray(getHandle("aTextureCoord"));
-        GLES20.glVertexAttribPointer(getHandle("aTextureCoord"), VERTICES_DATA_UV_SIZE, GL_FLOAT, false, VERTICES_DATA_STRIDE_BYTES, VERTICES_DATA_UV_OFFSET);
-
+        //GLES20.glVertexAttribPointer(getHandle("aTextureCoord"), VERTICES_DATA_UV_SIZE, GL_FLOAT, false, VERTICES_DATA_STRIDE_BYTES, VERTICES_DATA_UV_OFFSET);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texName);
         GLES20.glUniform1i(getHandle("sTexture"), 0);
 
         onDraw();
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+        GLES20.glVertexAttribPointer(getHandle("aTextureCoord"),2,GLES20.GL_FLOAT,false,8,textureVertexBuffer);
+        GLES20.glVertexAttribPointer(getHandle("aPosition"), 3, GLES20.GL_FLOAT, false, 12, vertexBuffer);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, GLIGlassFilter.filterGrid.getIndicesCount(), GLES20.GL_UNSIGNED_INT, indiceBuffer);
 
-        GLES20.glDisableVertexAttribArray(getHandle("aPosition"));
-        GLES20.glDisableVertexAttribArray(getHandle("aTextureCoord"));
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glVertexAttribPointer(getHandle("aPosition"), 3, GLES20.GL_FLOAT, false, 12, vertexBufferRight);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, GLIGlassFilter.filterGrid.getIndicesCount(), GLES20.GL_UNSIGNED_INT, indiceBuffer);
+        //GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+        //GLES20.glDisableVertexAttribArray(getHandle("aPosition"));
+        //GLES20.glDisableVertexAttribArray(getHandle("aTextureCoord"));
+        //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        //GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
     protected void onDraw() {
